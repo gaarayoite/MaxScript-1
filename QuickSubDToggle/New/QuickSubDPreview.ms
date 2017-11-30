@@ -1,7 +1,8 @@
 --By Dmitry Gubkin
---Module version - 1.0.1
+--Module version - 1.0.2
 --Main Script - Struct QuickSubDPreview
 --for 3ds 2016 and higher
+
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 global The_QSubDTogg -- var for struct instance
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -16,10 +17,10 @@ private GlobalModName = "Global_QSubD_Preview", -- global modifier name
 private FixedModName = "Fixed_QSubD_Preview", -- fixed modifier name
 private IniName = "QuickSubDConfig.ini", --name of *.ini configuration file
 private ScriptPath = (symbolicPaths.getPathValue "$userScripts")+"\\DmitryG Tools\\QuickSubDPreview\\", -- Default Script Directory
-private IniKeys = #("Iterations", "Enable Render Iterations","Render Iterations","Isolate Display","Stack Position","SubD Mod","Undo Off", "Skip By Poly Count","Poly Count","Make Fixet Firs","Enable Fixed Itr.","Fixed Itr."), --keywords for *.ini "SubD Config"
-private SubDVars =#(#("Top Stack","After Selection","Before Selection"),#("Turbo Smooth","Mesh Smooth","OpenSubdiv")), --SubD variants, 1- Mod StackPosition, 2 - SubD Mod
-private AvailableMods = #("Turbo Smooth","Mesh Smooth"), -- default availabale subD methods, needs to quick accsess via mod switch
+private IniKeys = #("Iterations", "Enable Render Iterations","Render Iterations","Isolate Display","Stack Position","SubD Mod","Undo Off", "Skip By Poly Count","Poly Count","Make Fixet Firs","Enable Fixed Itr.","Fixed Itr.","Ignore MeshSmooth"), --keywords for *.ini "SubD Config"
+private SubDVars =#(#("Top Stack","After Selection","Before Selection"),#("Turbo Smooth","Mesh Smooth","OpenSubdiv"), #("Any","Global","Fixed"),#("Any","Turbo Smooth","Mesh Smooth","OpenSubdiv")), --SubD variants, 1- Mod StackPosition, 2 - SubD Mod
 private SubDModsArr = #(TurboSmooth(),Meshsmooth(),OpenSubdiv()), -- default modifier for with global control feature
+private GWSwitchTextSettings = #("SubDMod",2000,[0,0,0], (color 24 154 149)), -- settings for the text on global subD mod switching
     -------------Members-----------------
 	
 -------------Funcs-----------------
@@ -28,21 +29,24 @@ private SubDModsArr = #(TurboSmooth(),Meshsmooth(),OpenSubdiv()), -- default mod
 --Get last position in stack of selected modifier (only geometry objects!!!)
 private function fn_GetModLastPos objs  = 
 (
-with undo off 
+with undo off
 (
-	ModPos =0
+	with redraw off
+	(
+		ModPos =0
 
-if objs.count !=0 do 
-(	
-	SetCommandPanelTaskMode #modify
-	local currMod =  modPanel.getCurrentObject()
+		if objs.count !=0 do 
+		(	
+			SetCommandPanelTaskMode #modify
+			local currMod =  modPanel.getCurrentObject()
 
 		if superclassof currMod == modifier and currMod != SubDMod  do
 		(ModPos = modPanel.getModifierIndex  objs[1] currMod)		
 	
-	SetCommandPanelTaskMode #create
-)		
+		SetCommandPanelTaskMode #create
+		)		
 	print(ModPos)
+	)
 )
 ),
 -- end func
@@ -51,7 +55,7 @@ if objs.count !=0 do
 --Default modifier paramiters 
 private function fn_SetDefaultSetting =
 (
-           with undo off ( ModSettings = #(2, false, 3, false, SubDVars[1][1], SubDVars[2][1], true, false,1000,true,true,#(5,2,3)) )
+           with undo off ( ModSettings = #(2, false, 3, false, SubDVars[1][1], SubDVars[2][1], true, false,1000,true,true,#(1,2,3),true))
 			--1 - iteration count; 
 			--2 - render iterations bool; 
 			--3 - render iterations count;			
@@ -64,6 +68,7 @@ private function fn_SetDefaultSetting =
 			--10 - Make fixed firs
 			--11 - Enable fixed iterations per subd mod
 			--12 - fixed iterations values
+			--13 - Ignore MeshSmooth switching
 ),
 -- end func
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -91,7 +96,7 @@ set undo off
 			(
 				if subDFixed == true then 
 					(
-						SubDMod = TurboSmooth()
+						SubDMod = MeshSmooth()
 						subDLevel = ModSettings[12][2]
 					)
 					else (SubDMod = SubDModsArr[2])
@@ -103,7 +108,7 @@ set undo off
 						(
 							if subDFixed == true then 
 								(
-									SubDMod = TurboSmooth()
+									SubDMod = OpenSubdiv()
 									subDLevel = ModSettings[12][3]
 								)
 								else (SubDMod = SubDModsArr[3])
@@ -222,11 +227,54 @@ private function fn_DeleteSubD obj =
 --end func	
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+--help function change subD mod to the next
+private function fn_SubDModNext objMod isfixed=
+(
+-- objMod - current subD mod
+-- bool isfixed: true when fixed ierations are used and selection not empty
+with undo off 
+(
+	local indx = 1
+	local flag = true 
+	for i=1 to SubDModsArr.count do 
+	 (
+		if ((classof objMod) == (ClassOf  SubDModsArr[i])) and (flag == true) do
+		(
+			flag = false
+			if (i+1)<=SubDModsArr.count then
+				(
+					indx = i+1
+					if indx == 2 and ModSettings[13] == true  do (indx=3) -- switch do openSubD and skip meshsmooth mod
+				)
+				else
+					(
+						indx=1	
+					)
+		)	
+	 )
+	ModSettings[6] = SubDVars[2][indx]
+	print ModSettings[6]
+	print indx
+	if isfixed == true then 
+	(
+		print "vvvvvvv"
+		fn_ApplySubDParams true
+	)
+	else (
+		print "eeeee"
+		SubDMod = SubDModsArr[indx])
+		print SubDMod
+)
+),
+--end func	
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 --Update or remove SubD modifiers
 public function fn_UpdateSubD upd sel itrfix=
 (   
 --bool the_upd: 0 - remove modifiers; 1 - update modifiers; 2 - add modifers; 3 - update and add
 --bool the_sel: true - selected objects; false- all
+--bool itrfix: true when SubDSwitch on, false - else
 
 	local objs =#()
 	
@@ -247,24 +295,67 @@ with redraw off
 (
 --Get last modifier position of Geometry objects
 	fn_GetModLastPos objs
-	local currMod = SubDMod
+
+	
+	local currMod = SubDMod -- current global subDMod
+	local objMod = SubDMod -- SubDMod of current object
+
 	for obj in objs do 
 	(
-		if obj.modifiers[#Global_QSubD_Preview]!=undefined then 
+		if obj.modifiers[#Global_QSubD_Preview]!=undefined or obj.modifiers[#Fixed_QSubD_Preview]!=undefined then 
 		(
-			ModPos = modPanel.getModifierIndex obj obj.modifiers[#Global_QSubD_Preview] 
+			
+			if obj.modifiers[#Global_QSubD_Preview] != undefined then
+			(
+				ModPos = modPanel.getModifierIndex obj obj.modifiers[#Global_QSubD_Preview]
+				objMod = obj.modifiers[#Global_QSubD_Preview]
+				
+			)
+				else
+					(
+						ModPos = modPanel.getModifierIndex obj obj.modifiers[#Fixed_QSubD_Preview]
+						objMod = obj.modifiers[#Fixed_QSubD_Preview]
+					)
+
 			ModPos-=1
 --Make modifier iterations fixed
 			if itrfix == true do 
 			(
-				for i=1 to SubDVars[2].count by 1 do 
+				
+				if ModSettings[11] == true then
 				(
-					if obj.modifiers[#Global_QSubD_Preview] == SubDModsArr[i] do 
+					if ModSettings[10] == true then 
 					(
-						ModSettings[6] = SubDVars[2][i]
-						fn_ApplySubDParams true
+					local isModFixed = false
+						for i=1 to SubDVars[2].count by 1 do 
+						(
+							if obj.modifiers[#Global_QSubD_Preview] == SubDModsArr[i] then 
+							(
+								ModSettings[6] = SubDVars[2][i]
+								fn_ApplySubDParams true -- switch mod to fixed current mod keeps
+								isModFixed = true
+								print("Fixed firs make fixed")
+							)
+
+						)
+						if isModFixed == false do 
+							(
+								print("Fixed firs make gloabal")
+								fn_SubDModNext objMod true -- switch mod to fixed next
+							) 
 					)
-				)	
+					 else
+						(
+							print("Not Fixed firs")
+							fn_SubDModNext objMod true -- switch mod to fixed next
+						)
+				)
+				 else
+					 (
+						 print("Global Switch")
+						 fn_SubDModNext currMod false -- switch mod of current object to global
+						
+					 ) 	
 				
 			)
 --remove old modifier
@@ -274,12 +365,12 @@ with redraw off
 			if upd == 1 or upd ==3 do 
 			(
 -- [1][3] add modifier before ModPos index 
-				fn_PushMod obj SubDVars[1][3] 	
+				fn_PushMod obj SubDVars[1][3] 
+				
 			)
 
 -- reset modifier position to default value
-		ModPos = 0 
-
+		ModPos = 0 	
 		)
 		else 
 			(
@@ -292,8 +383,9 @@ with redraw off
 	)
 )--redraw off end
 
-if itrfix == true do 
+if itrfix == true  do 
 (
+	print SubDMod
 	SubDMod = currMod
 )
 	SetCommandPanelTaskMode #modify 
@@ -302,60 +394,193 @@ if itrfix == true do
 --end func	
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+--callback for displaying sub mod on it changing
+private function GW_DisplayCurrentSubD   =
+(
+	gw.setTransform (matrix3 1)
+	gw.htext GWSwitchTextSettings[3] GWSwitchTextSettings[1] color:GWSwitchTextSettings[4] --text from left down origin
+	gw.enlargeUpdateRect #whole  
+
+-- automatically unreg callback
+	if timeStamp()>GWSwitchTextSettings[2] do 
+	(
+		unregisterRedrawViewsCallback GW_DisplayCurrentSubD 
+	)
+),
+--end func	
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+-- callBack Draw subD on objects 
+private function GW_DrawObjsSubD = 
+(
+local currColor = (color 34  208  201 ) -- cyan by default
+local currText = "SubDMod"
+for obj in $* do 
+(
+	if superClassOf obj == GeometryClass do 
+	(
+		
+
+		if obj.modifiers[#Global_QSubD_Preview]!= undefined or obj.modifiers[#Fixed_QSubD_Preview]!= undefined do 
+		(
+			if obj.modifiers[#Global_QSubD_Preview]!= undefined then 
+			(
+				currColor = (color 35  210  84) -- green global mods
+				currText = "#Global: " + ((classof obj.modifiers[#Global_QSubD_Preview]) as string) + " X" + ((obj.modifiers[#Global_QSubD_Preview].iterations) as string) 
+			)
+			else 
+				(
+					currColor = (color 251 101  42) -- orange fixed mods
+					currText = "#Fixed: " + ((classof obj.modifiers[#Fixed_QSubD_Preview]) as string) + " X" + ((obj.modifiers[#Fixed_QSubD_Preview].iterations) as string) 
+				)
+
+			gw.setTransform (matrix3 1)
+			gw.text (obj.center) currText color:currColor --text on objects
+			gw.enlargeUpdateRect #whole  
+		)
+	)
+)
+
+),
+--end func	
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 --Switch between subD mods
 public function fn_SwitchSubD =
 (
-	local inx = 1 -- index by default
-	local flag = true 
+unregisterRedrawViewsCallback GW_DisplayCurrentSubD -- unreg callback
 
-local currMod = SubDMod
-if $!= undefined do 
-(
-	objs = for obj in $ where (superClassOf obj == GeometryClass) collect obj
-)
-
-	SubDMod = currMod
-/*
-	for i=1 to AvailableMods.count by 1 do 
+	if $ == undefined then 
+	(
+		fn_SubDModNext subDMod false -- change global subD mod
+		
+		GWSwitchTextSettings[1] = "#Global " + ModSettings[6] + ": X" + (SubDMod.iterations as string) -- gw text
+		GWSwitchTextSettings[2] = timeStamp() + 1800 -- dispaing time 1,8 sec
+		GWSwitchTextSettings[3] = [ceil(gw.getWinSizeX()/2), ceil (0.05 * gw.getWinSizeY()) , 0] -- position on screen
+		
+		for i=1 to SubDModsArr.count do --Specify color
 		(
-			if AvailableMods[i] == ModSettings[6] and flag == true do 
-				(
-					if (i+1)<=AvailableMods.count then 
-					(
-						ModSettings[6] = AvailableMods[i+1] 
-						inx = i+1
-						flag = false
-					)
-					else(
-							ModSettings[6] = AvailableMods[1]
-							inx = 1
-							flag = false
+			if ClassOf SubDMod  == ClassOf SubDModsArr[i] do 
+			(
+				case i of
+						(
+							1:(GWSwitchTextSettings[4] = (color 35  210  84  )) -- color for turbosmooth, green
+							2:(GWSwitchTextSettings[4] = (color 251 101  42  )) -- meshsmooth, orange
+							3:(GWSwitchTextSettings[4] = (color 34  208  201 )) -- opensubdiv, cyan
 						)
-				)
+			)
 		)
-		SubDMod = SubDModsArr[inx]
-		fn_UpdateSubD 1 true
-*/		
+
+		registerRedrawViewsCallback  (GW_DisplayCurrentSubD ) -- callback reg
+		gw.updateScreen() --update screen
+	)
+	else (fn_UpdateSubD 1 true true) --change subDMod of selected objects
+
+	redrawViews()	
+),
+--end func	
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+--Display SubD Mods per object
+public function fn_DisplaySubDOnObjs disp = 
+(
+-- bool disp: true - display subD mods, false - not display
+with undo off 
+(
+	unregisterRedrawViewsCallback (GW_DrawObjsSubD)
+	if disp == true do 
+	(
+		registerRedrawViewsCallback (GW_DrawObjsSubD)
+	)
+	gw.updateScreen() --update screen
+)
+	redrawViews()
 ),
 --end func	
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 --select objects which have subD mod
-public function fn_SelectSubDObjects =
+public function fn_SelectSubDObjects ModType SubDType =
 (
-	clearSelection()
-	local objs = #()
-	objs = for obj in $* where(superClassOf obj == GeometryClass) collect obj
+-- ModType : fixed or global or bouth
+-- SubDType: TurboSmooth, MeshSmooth, OpenSubDivision or all together
+clearSelection()
+with redraw off 
+(
 
-with redraw off
+with undo off 
 (
-	for obj in objs do 
+
+local objs = #()
+objs = for obj in $* where(superClassOf obj == GeometryClass and (obj.modifiers[#Global_QSubD_Preview]!= undefined or  obj.modifiers[#Fixed_QSubD_Preview]!= undefined)) collect obj
+
+---filter by mod type : global or fixed or fixed and global
+---filter by  SubD Method : all or turbosmooth or meshsmmoth or openSubD
+
+local objGlobal = #()  -- object whith global modType
+local objFixed = #()  -- object whith fixed modType
+
+if ModType == SubDVars[3][2] or ModType == SubDVars[3][1] do 
+(
+	if SubDType == SubDVars[4][2] then 
 	(
-		if obj.modifiers[#Global_QSubD_Preview] != undefined or obj.modifiers[#Fixed_QSubD_Preview] != undefined do 
-		(selectMore obj)
+		objGlobal =  for obj in objs where(obj.modifiers[#Global_QSubD_Preview]!=undefined and (ClassOf obj.modifiers[#Global_QSubD_Preview] == ClassOf SubDModsArr[1])) collect obj 
 	)
+	else 
+		(
+			if SubDType == SubDVars[4][3] then 
+				(
+					objGlobal =  for obj in objs where(obj.modifiers[#Global_QSubD_Preview]!=undefined and (ClassOf obj.modifiers[#Global_QSubD_Preview] == ClassOf SubDModsArr[2])) collect obj 
+				) 
+				else 
+					(
+						if SubDType == SubDVars[4][4] then 
+							(
+								objGlobal =  for obj in objs where(obj.modifiers[#Global_QSubD_Preview]!=undefined and (ClassOf obj.modifiers[#Global_QSubD_Preview] == ClassOf SubDModsArr[3])) collect obj 
+							) 
+							 else 
+								(
+									objGlobal =  for obj in objs where(obj.modifiers[#Global_QSubD_Preview]!=undefined) collect obj 
+								)
+					)
+		)
+		
 )
-redrawViews()	
+
+if ModType == SubDVars[3][3] or ModType == SubDVars[3][1] do 
+(
+	if SubDType == SubDVars[4][2] then 
+	(
+		objFixed =  for obj in objs where(obj.modifiers[#Fixed_QSubD_Preview]!=undefined and (ClassOf obj.modifiers[#Fixed_QSubD_Preview] == ClassOf SubDModsArr[1])) collect obj 
+	)
+	else 
+		(
+			if SubDType == SubDVars[4][3] then 
+			(
+				objFixed =  for obj in objs where(obj.modifiers[#Fixed_QSubD_Preview]!=undefined and (ClassOf obj.modifiers[#Fixed_QSubD_Preview] == ClassOf SubDModsArr[2])) collect obj 
+			) 
+			 else 
+				(
+					if SubDType == SubDVars[4][4] then 
+					(
+						objFixed =  for obj in objs where(obj.modifiers[#Fixed_QSubD_Preview]!=undefined and (ClassOf obj.modifiers[#Fixed_QSubD_Preview] == ClassOf SubDModsArr[3])) collect obj 
+					) 
+					 else 
+						(
+							objFixed =  for obj in objs where(obj.modifiers[#Fixed_QSubD_Preview]!=undefined) collect obj
+						)
+				)
+		)
+					
+)
+
+objs = join objGlobal objFixed
+
+) -- undo  off end
+SelectMore objs -- final select
+
+) -- redraw off end 
+RedrawViews()	
 ),
 --end func	
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -418,6 +643,7 @@ public function fn_SetSubDSettings arr =
 	ModSettings[10] = arr[10] as BooleanClass
 	ModSettings[11] = arr[11] as BooleanClass
 	ModSettings[12] = arr[12] as Array
+	ModSettings[13] = arr[12] as BooleanClass
 	fn_ApplySubDParams false
 ),
 --end func	
@@ -549,6 +775,12 @@ private function fn_ReadConfig =
 																ModSettings[i] = str as Array
 															) else (flag = true)				 
 														)
+
+														if i==13 do
+															(
+																if str =="true" or str =="false" then 
+																	( ModSettings[i] = str as BooleanClass) else (flag = true)
+															)
 									
         ) --end Loop
 
@@ -595,14 +827,14 @@ with redraw off
 		for obj in objs do
 		(
 				
-					if obj.modifiers[#Global_QSubD_Preview]!=undefined or obj.modifiers[#Fixed_QSubD_Preview]!=undefined then 
-					(
-						fn_DeleteSubD obj
-					)
-					else
-						(	
-							fn_PositionModInStack obj
-						)	
+			if obj.modifiers[#Global_QSubD_Preview]!=undefined or obj.modifiers[#Fixed_QSubD_Preview]!=undefined then 
+			(
+				fn_DeleteSubD obj
+			)
+			else
+				(	
+					fn_PositionModInStack obj
+				)	
 				
                 TogsCount+=1
 		)
