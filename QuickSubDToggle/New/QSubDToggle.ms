@@ -23,7 +23,7 @@ on execute do
 
             while ClassOf The_QSubDTogg == UndefinedClass do 
                 (
-                   if timeStamp()>maxTime then -- time out if it needs more then 20 sec
+                   if timeStamp()>maxTime do -- time out if it needs more then 20 sec
                     (
                         return (messageBox "Time out,impossible to read main script file\nTry Reinstall tool to fix it!" title:"Time Out Error")
                     )

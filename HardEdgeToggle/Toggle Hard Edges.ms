@@ -1,7 +1,7 @@
 macroScript Display_Hard_Edges
 buttonText: "Display HE"
-category:"DmitryGScripts"
-tooltip:"Display Hard Edges"
+category:"DmitryG Tools"
+tooltip:"Toggle Hard Edge Display"
 (
 	if ClassOf $ == Editable_Poly do 
 	(

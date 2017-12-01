@@ -1,6 +1,7 @@
 macroScript MoveToOrigin
-category:"DmitryGScripts"
-tooltip:"Move To Origin"
+buttonText:"Move To Origin"
+category:"DmitryG Tools"
+tooltip:"Move Selection To Origin"
 (
  if selection.count > 0 then 
   (

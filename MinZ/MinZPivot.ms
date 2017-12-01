@@ -1,6 +1,6 @@
 macroScript MinZPivot
 buttonText:"Min Z Pivot"
-category:"DmitryGScripts"
+category:"DmitryG Tools"
 tooltip:"Set Pivot To Min Z"
 (
     for obj in selection do(

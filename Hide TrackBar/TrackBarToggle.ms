@@ -1,5 +1,6 @@
 macroScript TrackBarToggle
-category:"DmitryGScripts"
+buttonText:"TrackBar"
+category:"DmitryG Tools"
 tooltip:"TrackBar Toggle"
 (
 if timeslider.isvisible()!=trackbar.visible then

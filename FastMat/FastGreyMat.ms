@@ -1,6 +1,6 @@
 macroScript FastGreyMat
 buttonText: "MAT Gray"
-category:"DmitryGScripts"
+category:"DmitryG Tools"
 tooltip:"Fast Grey Material"
 (
 global theFastMat
