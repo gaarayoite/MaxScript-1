@@ -1,7 +1,7 @@
 macroScript MultyBevelDialog
 buttonText: "MultyBevel"
 category:"DmitryG Tools"
-tooltip:"SubLevel Depend Bevel/Extrude Dialog"
+tooltip:"MultyBevel Dialog"
 (
     if GetCommandPanelTaskMode() == #modify do 
     (
