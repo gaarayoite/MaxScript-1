@@ -1,4 +1,4 @@
-macroScript Display_Hard_Edges
+macroScript ToggleHardEdgesDisplay
 buttonText: "Display HE"
 category:"DmitryG Tools"
 tooltip:"Toggle Hard Edge Display"
