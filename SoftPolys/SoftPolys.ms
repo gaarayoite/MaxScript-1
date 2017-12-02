@@ -1,5 +1,5 @@
 macroScript SoftPolys
-buttonText: "Soft Smooth"
+buttonText: "Soft Polys"
 category:"DmitryG Tools"
 tooltip:"Make Selected Polys Soft"
 (
