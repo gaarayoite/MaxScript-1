@@ -11,8 +11,27 @@ function fn_NewQSphere dim seg =
     SetCommandPanelTaskMode #create 
     with redraw off 
     (
-        QBox = Box()
-        QBox.Name = "QSphere" + ($*QSphere*.count +1) as string 
+        QBox = Box() 
+---making correct name
+        local NameDigits = ""
+        if ($*QSphere*.count +1)<10 then 
+        (
+            NameDigits = "00"+(($*QSphere*.count +1) as string)
+        )
+        else 
+            (
+                if ($*QSphere*.count +1)<100 then 
+                (
+                    NameDigits = "0"+(($*QSphere*.count +1) as string)
+                )
+                else 
+                    (
+                        NameDigits =($*QSphere*.count +1) as string 
+                    )                   
+            )
+--- end making correct name 
+
+        QBox.Name = "QSphere" +  NameDigits  --final name
         QBox. length = QBox. width = QBox. height = dim 
         QBox. widthsegs = QBox. lengthsegs = QBox.heightsegs = seg 
         QBox.Pivot = (QBox.center) as point3
@@ -29,7 +48,7 @@ function fn_NewQSphere dim seg =
 
 --UI
 try (DestroyDialog QSphereSettings) catch()
-rollout QSphereSettings "QSphere" width:120 height:131 
+rollout QSphereSettings "QSphere" width:120 height:126 
 (
     label lb_QDim "Diametr:" pos:[5,8] width:40 height:16 align:#left
     spinner spn_Dim  pos:[55,5] width:60 height:16 range:[0,99999.0,10.0] type:#float align:#left
