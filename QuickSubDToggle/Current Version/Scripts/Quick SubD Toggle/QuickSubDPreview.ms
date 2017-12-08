@@ -1,5 +1,5 @@
 --By Dmitry Gubkin
---Module version - 1.0.2
+--Module version - 1.0.3
 --Main Script - Struct QuickSubDPreview
 --for 3ds 2016 and higher
 
@@ -16,7 +16,7 @@ private	ModPos =0,  -- position of last selected modifier
 private GlobalModName = "Global_QSubD_Preview", -- global modifier name
 private FixedModName = "Fixed_QSubD_Preview", -- fixed modifier name
 private IniName = "QuickSubDConfig.ini", --name of *.ini configuration file
-private ScriptPath = (symbolicPaths.getPathValue "$userScripts")+"\\DmitryG Tools\\QuickSubDPreview\\", -- Default Script Directory
+private ScriptPath = getFilenamePath (getSourceFileName()), -- Default Script Directory
 private IniKeys = #("Iterations", "Enable Render Iterations","Render Iterations","Isolate Display","Stack Position","SubD Mod","Undo Off", "Skip By Poly Count","Poly Count","Make Fixet Firs","Enable Fixed Itr.","Fixed Itr.","Ignore MeshSmooth"), --keywords for *.ini "SubD Config"
 private SubDVars =#(#("Top Stack","After Selection","Before Selection"),#("Turbo Smooth","Mesh Smooth","OpenSubdiv"), #("Any","Global","Fixed"),#("Any","Turbo Smooth","Mesh Smooth","OpenSubdiv")), --SubD variants, 1- Mod StackPosition, 2 - SubD Mod
 private SubDModsArr = #(TurboSmooth(),Meshsmooth(),OpenSubdiv()), -- default modifier for with global control feature
@@ -45,7 +45,6 @@ with undo off
 	
 		SetCommandPanelTaskMode #create
 		)		
-	print(ModPos)
 	)
 )
 ),
@@ -55,7 +54,7 @@ with undo off
 --Default modifier paramiters 
 private function fn_SetDefaultSetting =
 (
-           with undo off ( ModSettings = #(2, false, 3, false, SubDVars[1][1], SubDVars[2][1], true, false,1000,true,true,#(1,2,3),true))
+           with undo off ( ModSettings = #(2, false, 3, false, SubDVars[1][1], SubDVars[2][1], true, false,1000,true,true,#(3,3,4),true))
 			--1 - iteration count; 
 			--2 - render iterations bool; 
 			--3 - render iterations count;			
@@ -76,8 +75,9 @@ private function fn_SetDefaultSetting =
 --Appling modifier paramiters
 private function fn_ApplySubDParams subDFixed =
 (
-set undo off
 
+with undo off 
+(
 	local subDLevel = ModSettings[1]
 
 	if ModSettings[6] ==SubDVars[2][1] then
@@ -136,7 +136,8 @@ set undo off
 
 		SubDMod.enabled = true
 		
-set undo on
+)
+
 ),
 -- end func
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -144,17 +145,29 @@ set undo on
 --helper, ads modifer with undo off check
 private function fn_AddMod obj the_pos =
 (
-	set undo off
-	if ModSettings[7] == false then
-		(
-			set undo on
-		)
-			if the_pos!=SubDVars[1][1] then 
+if ModSettings[7] == true then
+(
+	with undo off 
+	(
+		if the_pos!=SubDVars[1][1] then 
 			(
 				addmodifier obj SubDMod before:ModPos	
 			)
-			else(addmodifier obj SubDMod)	
-			
+			else(addmodifier obj SubDMod)
+	)
+)
+else 
+	(
+		with undo on 
+		(
+			if the_pos!=SubDVars[1][1] then 
+				(
+					addmodifier obj SubDMod before:ModPos	
+				)
+				else(addmodifier obj SubDMod)
+		)
+	)
+					
 ),
 -- end func
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -162,17 +175,17 @@ private function fn_AddMod obj the_pos =
 --Push modifier in object stack with poly check
 private function fn_PushMod obj the_pos= 
 (
-if modSettings[8] == false then
-(
-	fn_AddMod obj the_pos
-)
- else 
+	if modSettings[8] == false then
 	(
-		if obj.numFaces< ModSettings[9] do 
-		(
-			fn_AddMod obj the_pos
-		)
+		fn_AddMod obj the_pos
 	)
+	else 
+		(
+			if obj.numFaces< (ModSettings[9] *1000) do 
+			(
+				fn_AddMod obj the_pos
+			)
+		)
 ),
 -- end func
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -181,20 +194,20 @@ if modSettings[8] == false then
 private function fn_PositionModInStack obj  = 
 (
 	if ModSettings[5] == SubDVars[1][1] then
+	(
+		fn_PushMod obj ModSettings[5]	
+	)
+	else
 		(
-			fn_PushMod obj ModSettings[5]	
+			if ModSettings[5] == SubDVars[1][2]  then
+				(
+					ModPos-=1
+					-- if ModPos = -1 means selected  not modifier in the stack
+					if ModPos ==-1 do (ModPos = obj.modifiers.count+1)
+					fn_PushMod obj ModSettings[5]
+				)	
+				else (fn_PushMod obj ModSettings[5])						
 		)
-		else
-			(
-				if ModSettings[5] == SubDVars[1][2]  then
-					(
-						ModPos-=1
-						-- if ModPos = -1 means selected  not modifier in the stack
-						if ModPos ==-1 do (ModPos = obj.modifiers.count+1)
-						fn_PushMod obj ModSettings[5]
-					)	
-					else (fn_PushMod obj ModSettings[5])						
-			)
 		
 ),
 --end func
@@ -212,17 +225,26 @@ public function fn_RestoreSettings =
 --Delete modifier 
 private function fn_DeleteSubD obj =
 (
-	set undo off
-	if ModSettings[7] = false do
-		( 
-			set undo on
+ 
+if ModSettings[7] == true then
+( 
+	with undo off 
+	(
+			if obj.modifiers[#Global_QSubD_Preview]!=undefined then 
+			(deleteModifier obj obj.modifiers[#Global_QSubD_Preview])
+				else (deleteModifier obj obj.modifiers[#Fixed_QSubD_Preview])
+	)
+)
+else 
+	(
+		with undo on 
+		(
+				if obj.modifiers[#Global_QSubD_Preview]!=undefined then 
+				(deleteModifier obj obj.modifiers[#Global_QSubD_Preview])
+					else (deleteModifier obj obj.modifiers[#Fixed_QSubD_Preview])
 		)
-
-		if obj.modifiers[#Global_QSubD_Preview]!=undefined then 
-		(deleteModifier obj obj.modifiers[#Global_QSubD_Preview])
-			else (deleteModifier obj obj.modifiers[#Fixed_QSubD_Preview])
-						
-				
+	)
+							
 ),
 --end func	
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -253,17 +275,15 @@ with undo off
 		)	
 	 )
 	ModSettings[6] = SubDVars[2][indx]
-	print ModSettings[6]
-	print indx
 	if isfixed == true then 
 	(
-		print "vvvvvvv"
 		fn_ApplySubDParams true
 	)
 	else (
-		print "eeeee"
-		SubDMod = SubDModsArr[indx])
-		print SubDMod
+			SubDMod = SubDModsArr[indx]
+			ModSettings[6] = SubDVars[2][indx]	
+		)
+
 )
 ),
 --end func	
@@ -334,32 +354,27 @@ with redraw off
 								ModSettings[6] = SubDVars[2][i]
 								fn_ApplySubDParams true -- switch mod to fixed current mod keeps
 								isModFixed = true
-								print("Fixed firs make fixed")
 							)
 
 						)
 						if isModFixed == false do 
 							(
-								print("Fixed firs make gloabal")
 								fn_SubDModNext objMod true -- switch mod to fixed next
 							) 
 					)
 					 else
 						(
-							print("Not Fixed firs")
 							fn_SubDModNext objMod true -- switch mod to fixed next
 						)
 				)
 				 else
 					 (
-						 print("Global Switch")
-						 fn_SubDModNext currMod false -- switch mod of current object to global
-						
+						 fn_SubDModNext objMod false -- switch mod of current object to global						
 					 ) 	
 				
 			)
 --remove old modifier
-			fn_DeleteSubD obj
+		fn_DeleteSubD obj
 
 --add new updated modifier
 			if upd == 1 or upd ==3 do 
@@ -385,7 +400,6 @@ with redraw off
 
 if itrfix == true  do 
 (
-	print SubDMod
 	SubDMod = currMod
 )
 	SetCommandPanelTaskMode #modify 
@@ -430,7 +444,7 @@ for obj in $* do
 			)
 			else 
 				(
-					currColor = (color 251 101  42) -- orange fixed mods
+					currColor = (color 24  221  213) -- cyan fixed mods
 					currText = "#Fixed: " + ((classof obj.modifiers[#Fixed_QSubD_Preview]) as string) + " X" + ((obj.modifiers[#Fixed_QSubD_Preview].iterations) as string) 
 				)
 
@@ -589,7 +603,7 @@ RedrawViews()
 public function fn_GetUIData =
 (
 --valid array for ui elements: 1 - stack position ops, 2 - subD methods
-return SubDVars
+return deepCopy  SubDVars
 
 ),
 --end func	
@@ -603,32 +617,12 @@ public function fn_GetSubDSettings =
 	ModSettings[3] = SubDMod.renderIterations
 	ModSettings[4] = SubDMod.isolineDisplay
 
-	return ModSettings
+	return  deepCopy ModSettings
 ),
 --end func	
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
---Get directory of current file
-public function fn_GetMSDir =
-(
-	local fullPath = getThisScriptFilename()
-	local str = "\\"
-
-	for i in (fullPath.count) to 1 by -1 do 
-	(
-		
-		if fullPath[i] == str do 
-		(
-			ScriptPath = substring fullPath 1 i
-			print (ScriptPath)
-			exit
-			
-		)
-	) 
-),
---end func	
---------------------------------------------------------------------------------------------------------------------------------------------------------------
-
+-- set settings
 public function fn_SetSubDSettings arr =
 (
 	ModSettings[1] = arr[1] as integer
@@ -643,8 +637,20 @@ public function fn_SetSubDSettings arr =
 	ModSettings[10] = arr[10] as BooleanClass
 	ModSettings[11] = arr[11] as BooleanClass
 	ModSettings[12] = arr[12] as Array
-	ModSettings[13] = arr[12] as BooleanClass
+	ModSettings[13] = arr[13] as BooleanClass
 	fn_ApplySubDParams false
+),
+--end func	
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+--Remove config file 
+public function fn_RemoveConfig = 
+(
+	local IniPath = ScriptPath+ IniName
+	if doesFileExist (IniPath) == true do 
+	(
+		if (queryBox  "Delete config file ?" title:"Config File Delete") == true do deleteFile IniPath
+	)
 ),
 --end func	
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -652,7 +658,7 @@ public function fn_SetSubDSettings arr =
 --Writing config file
 public function fn_WriteConfig =
 (
-	local IniPath =ScriptPath+ IniName
+	local IniPath =ScriptPath + IniName
 
 		for i=1 to IniKeys.count do
 		(
@@ -667,7 +673,7 @@ public function fn_WriteConfig =
 private function fn_ReadConfig =
 (
     local msg = "=>Config file: "--message base for user
-    local IniPath =ScriptPath+ IniName
+    local IniPath = ScriptPath+ IniName
 
     if doesFileExist (IniPath) ==true then 
 (
@@ -814,7 +820,7 @@ public function fn_ToggSubD =
 ---------Garbage Collector Force---------
 
 --------SetUp QuickSubDModifier-------
-	if ($!=undefined)  do
+	if ($!=undefined)  then
 	(
 --Collect GeometryClass objects
 local objs = for obj in $ where(superClassOf obj == GeometryClass) collect obj
@@ -844,6 +850,7 @@ with redraw off
 		SetCommandPanelTaskMode #modify
 		RedrawViews()
 	)
+	else (fn_SwitchSubD()) -- switch subD when selection is empty
 ),
 --end func	
 --------------------------------------------------------------------------------------------------------------------------------------------------------------

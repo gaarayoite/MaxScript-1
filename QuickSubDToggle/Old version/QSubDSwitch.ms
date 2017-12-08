@@ -1,10 +1,9 @@
-macroScript Test01
-buttonText: "ToggSubD"
-category:"DmitryGScripts"
-tooltip:"Toggle Subdivison"
+macroScript QSubDSwitch
+buttonText: "SwitchSubD"
+category:"DmitryG Tools"
+tooltip:"Switch SubD"
 (
-global The_QSubDTogg -- var for Instance of QuickSubDPreview struct
-MsFolderPath = (symbolicPaths.getPathValue "$userScripts")+"\\DmitryG Tools\\QuickSubDPreview\\" -- Default Script folder Path
+ MsFolderPath = (symbolicPaths.getPathValue "$userScripts")+"\\Quick SubD Toggle\\" -- Default Script folder Path
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 --Toggle SubDPreview

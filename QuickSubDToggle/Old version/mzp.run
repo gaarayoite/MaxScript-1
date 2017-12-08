@@ -1,0 +1,9 @@
+name "QuickSubDToggle"
+
+
+extract to $temp\QST
+
+run  QSubDToggInstaller.ms
+drop QSubDToggInstaller.ms
+
+clear temp
