@@ -5,6 +5,7 @@ rollout QSTogg_Intaller "Quick SubD Toggle v1.0.2" width:215 height:70
     local invalidver = (MaxVersion())[1]<18000 -- check 3ds max version
     local usermacros = (symbolicPaths.getPathValue "$userMacros")+"\\"
     local userscripts = (symbolicPaths.getPathValue "$userScripts")+"\\"
+    local usericons = (symbolicPaths.getPathValue "$usericons")+"\\"
     local startupdir =   userscripts + "startup\\"
     local tmpdir = getFilenamePath (getSourceFileName())
     button btn_inst "Install" pos:[5,25] width:100 height:30
@@ -32,22 +33,25 @@ rollout QSTogg_Intaller "Quick SubD Toggle v1.0.2" width:215 height:70
     (
         The_QSubDTogg = undefined
         local msdir =  userscripts + "Quick SubD Toggle"
-        fn_DelFolder msdir
+        fn_DelFolder msdir -- delete foler
 
-        for i in (getFiles (usermacros+"*QSubD*")) do ( try(deleteFile i) catch() )
+        for i in (getFiles (usermacros+"*QSubD*")) do ( try(deleteFile i) catch() ) -- delete macros
 
         if doesFileExist (startupdir + "QSTAutoLoad.ms") do 
         (
-             try(deleteFile (startupdir + "QSTAutoLoad.ms")) catch()
+             try(deleteFile (startupdir + "QSTAutoLoad.ms")) catch() --delete autoload script
         )
+        
+        for i in (getFiles (usericons+"*QST_icons*")) do ( try(deleteFile i) catch() ) --delete icons
         sleep 1
     )
 
     function fn_Install  = 
     (
         fn_Uninstall()
-        fn_CopyDir (tmpdir + "Scripts\\")  userscripts 
-        fn_CopyDir (tmpdir + "Startup\\")  startupdir 
+        fn_CopyDir (tmpdir + "Scripts\\")   userscripts 
+        fn_CopyDir (tmpdir + "Startup\\")   startupdir 
+        fn_CopyDir (tmpdir + "Icons\\")     usericons 
         sleep 1
         for i in (getFiles (tmpdir+"\\Macro\\*.ms")) do (try (filein i ) catch(messageBox "Error on installation" title:"Error"))
         sleep 1
@@ -63,11 +67,13 @@ rollout QSTogg_Intaller "Quick SubD Toggle v1.0.2" width:215 height:70
     on btn_inst pressed do 
     (
         fn_Install()
+        colorman.reInitIcons()
     )
 
     on btn_uninst pressed do 
     (
         fn_Uninstall()
+        colorman.reInitIcons()
         messageBox "Quick SubD Toggle Uninstalled Successfully!" title:"Quick SubD Toggle"
     )
 

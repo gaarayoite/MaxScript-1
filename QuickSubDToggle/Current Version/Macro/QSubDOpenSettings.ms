@@ -1,11 +1,13 @@
 macroScript QSubDOpenSettings
 buttonText: "SubDSettings"
 category:"DmitryG Tools"
-tooltip:"OpenSubD Settings"
+tooltip:"QSubD Settings"
+icon:#("QST_icons",3)
 silentErrors: true
 (
 MsFolderPath = (symbolicPaths.getPathValue "$userScripts")+"\\Quick SubD Toggle\\" -- Default Script folder Path
-
+global The_QSubDTogg
+global The_ReloadSettings
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 --Toggle SubDPreview
 on execute do 
@@ -14,6 +16,12 @@ on execute do
     
         if doesFileExist MsPath == true then 
         (
+            if The_ReloadSettings == undefined do (The_ReloadSettings=true)
+            if The_ReloadSettings == true do 
+            (
+                The_ReloadSettings = false
+                filein MsPath
+            )
             filein MsPath
         )
         else 

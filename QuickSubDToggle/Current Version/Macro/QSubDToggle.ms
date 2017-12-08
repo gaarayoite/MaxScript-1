@@ -3,9 +3,11 @@ buttonText: "ToggSubD"
 category:"DmitryG Tools"
 tooltip:"Toggle SubD"
 silentErrors: true 
+icon:#("QST_icons",1)
 (
  MsFolderPath = (symbolicPaths.getPathValue "$userScripts")+"\\Quick SubD Toggle\\" -- Default Script folder Path
  global The_QSubDTogg
+ global The_ReloadSettings
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 --Toggle SubDPreview
@@ -34,6 +36,12 @@ local MsPath = MsFolderPath + "QuickSubDPreviewSettings.ms"
 
     if doesFileExist MsPath == true then 
     (
+        if The_ReloadSettings == undefined do (The_ReloadSettings=true)
+        if The_ReloadSettings == true do 
+        (
+            The_ReloadSettings = false
+            filein MsPath
+        )
         filein MsPath
     )
     else 

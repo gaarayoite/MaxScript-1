@@ -36,82 +36,7 @@ function fn_CheckMS =
 )
 --end func 
 
---------------------------------------------------------------------------------------------------------------------------------------
---Load Drop Down Lists Items
-function fn_LoadDDLItems =
-(
-	local ddlArr =The_QSubDTogg.fn_GetUIData()
---main UI--
-	qs_SubMainMenu01.ddl_PositionInStack.items = ddlArr[1]
-	qs_SubMainMenu01.ddl_SubDType.items = ddlArr[2]
 
---Exstra Tools	
-	qs_Tools01.ddl_SubDType.items = ddlArr[3]
-	qs_Tools01.ddl_SubDMethod.items = ddlArr[4]
-)
---end func 
-
---Set Checkbox state
-function fn_SetCheck val = 
-(
-	if val == false then return 0 else return 1
-)
---end func 
-
---------------------------------------------------------------------------------------------------------------------------------------
---Read Settings
-function fn_ReadSettings = 
-(
-	local flag = false
-	The_SetArr = The_QSubDTogg.fn_GetSubDSettings() -- local settings array
-
--- select drop down list items by current settings	
-	for j=1 to (qs_SubMainMenu01.ddl_PositionInStack.items.count) do 
-	(
-		if (qs_SubMainMenu01.ddl_PositionInStack.items[j] == The_SetArr[5]) and flag == false  do 
-		(
-			qs_SubMainMenu01.ddl_PositionInStack.selection = j
-			flag =true
-		)
-		
-	)
-flag = false
-	for j=1 to (qs_SubMainMenu01.ddl_SubDType.items.count) do 
-	(
-		if (qs_SubMainMenu01.ddl_SubDType.items[j] == The_SetArr[6]) and flag == false do 
-		(
-			qs_SubMainMenu01.ddl_SubDType.selection = j
-			flag = true
-		)
-		
-	)
---Fill Main Settings
-qs_SubMainMenu01.spn_ItrsCount.value = The_SetArr[1]
-qs_SubMainMenu01.chk_RenderIters.triState  = (fn_SetCheck The_SetArr[2])
-qs_SubMainMenu01.spn_RenderItrsCount.value = The_SetArr[3]
-qs_SubMainMenu01.chk_IsolateDisplay.triState  = (fn_SetCheck The_SetArr[4])
-qs_SubMainMenu01.chk_UndoOff.triState  = (fn_SetCheck The_SetArr[7])
-qs_SubMainMenu01.chk_SkipByPoly.triState = (fn_SetCheck The_SetArr[8])
-qs_SubMainMenu01.spn_PolyCount.value = The_SetArr[9]
-
-
--- Fill SubD Switch 
-qs_SubDSwitch01.chk_FixedIter.triState 	= (fn_SetCheck The_SetArr[11])
-qs_SubDSwitch01.chk_MakeFixedFirs.triState	= (fn_SetCheck The_SetArr[10])
-qs_SubDSwitch01.spn_FixedItrsTS.value 	= The_SetArr[12][1]
-qs_SubDSwitch01.spn_FixedItrsMS.value 	= The_SetArr[12][2]
-qs_SubDSwitch01.spn_FixedItrsOS.value	= The_SetArr[12][3]
-qs_SubDSwitch01.chk_MSSkip.triState   	= (fn_SetCheck The_SetArr[13])
-
---enable elements of SubD Switch roll
-qs_SubDSwitch01.chk_MakeFixedFirs.enabled	=
-qs_SubDSwitch01.spn_FixedItrsTS.enabled 	=
-qs_SubDSwitch01.spn_FixedItrsMS.enabled 	=
-qs_SubDSwitch01.spn_FixedItrsOS.enabled		= The_SetArr[11]	
-qs_SubMainMenu01.spn_RenderItrsCount.enabled = The_SetArr[2] --enable/disable rener iters spiner
-qs_SubMainMenu01.spn_PolyCount.enabled = The_SetArr[8] -- enable/disable skip by poly count	
-)
---end func
 
 --------------------------------------------------------------------------------------------------------------------------------------
 --Apply config
@@ -124,7 +49,7 @@ function fn_SetConfig =
 --------------------------------------------------------------------------------------------------------------------------------------------
 ---Main UI 
 --------------------------------------------------------------------------------------------------------------------------------------------	
-rollout QuickSubDSettings "QuickSubD Settings v1.0.1" width:395 height:290
+rollout QuickSubDSettings "Quick SubD Toggle Settings v1.0.2" width:395 height:290
 (
 	subrollout qs_MainMenu    	width: 190 height:240 pos: [5,5] 		align:#left
 	subrollout qs_SubDSwitch    width: 190 height:110 pos: [200,5] 		align:#left
@@ -385,7 +310,11 @@ rollout qs_Tools01 "Exstra Tools"
 )
 -- end sub roll 
 
-	
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+--create dialog function	
+function fn_Makedialog = 
+(
 createdialog QuickSubDSettings style:#(#style_toolwindow, #style_border, #style_sysmenu)
 AddSubrollout QuickSubDSettings.qs_MainMenu qs_SubMainMenu01 
 AddSubrollout QuickSubDSettings.qs_SubDSwitch qs_SubDSwitch01 
@@ -402,11 +331,94 @@ QuickSubDSettings.btn_OK.pos = QuickSubDSettings.btn_Apply.pos+[65,0]
 QuickSubDSettings.btn_Toggle.pos = [5, QuickSubDSettings.height]-[0,47] 
 QuickSubDSettings.btn_Switch.pos = QuickSubDSettings.btn_Toggle.pos+[65,0]
 QuickSubDSettings.btn_DisplaySubD.pos = QuickSubDSettings.btn_Switch.pos+[65,0]
+-- end buttons position	
+)
+--end func
 
+fn_Makedialog() -- create dialog 
+
+--------------------------------------------------------------------------------------------------------------------------------------
+--Load Drop Down Lists Items
+function fn_LoadDDLItems =
+(
+	local ddlArr =The_QSubDTogg.fn_GetUIData()
+--main UI--
+	qs_SubMainMenu01.ddl_PositionInStack.items = ddlArr[1]
+	qs_SubMainMenu01.ddl_SubDType.items = ddlArr[2]
+
+--Exstra Tools	
+	qs_Tools01.ddl_SubDType.items = ddlArr[3]
+	qs_Tools01.ddl_SubDMethod.items = ddlArr[4]
+)
+--end func 
+
+--Set Checkbox state
+function fn_SetCheck val = 
+(
+	if val == false then return 0 else return 1
+)
+--end func 
+
+--------------------------------------------------------------------------------------------------------------------------------------
+--Read Settings
+function fn_ReadSettings = 
+(
+	local flag = false
+	The_SetArr = The_QSubDTogg.fn_GetSubDSettings() -- local settings array
+
+-- select drop down list items by current settings	
+	for j=1 to (qs_SubMainMenu01.ddl_PositionInStack.items.count) do 
+	(
+		if (qs_SubMainMenu01.ddl_PositionInStack.items[j] == The_SetArr[5]) and flag == false  do 
+		(
+			qs_SubMainMenu01.ddl_PositionInStack.selection = j
+			flag =true
+		)
+		
+	)
+flag = false
+	for j=1 to (qs_SubMainMenu01.ddl_SubDType.items.count) do 
+	(
+		if (qs_SubMainMenu01.ddl_SubDType.items[j] == The_SetArr[6]) and flag == false do 
+		(
+			qs_SubMainMenu01.ddl_SubDType.selection = j
+			flag = true
+		)
+		
+	)
+--Fill Main Settings
+qs_SubMainMenu01.spn_ItrsCount.value = The_SetArr[1]
+qs_SubMainMenu01.chk_RenderIters.triState  = (fn_SetCheck The_SetArr[2])
+qs_SubMainMenu01.spn_RenderItrsCount.value = The_SetArr[3]
+qs_SubMainMenu01.chk_IsolateDisplay.triState  = (fn_SetCheck The_SetArr[4])
+qs_SubMainMenu01.chk_UndoOff.triState  = (fn_SetCheck The_SetArr[7])
+qs_SubMainMenu01.chk_SkipByPoly.triState = (fn_SetCheck The_SetArr[8])
+qs_SubMainMenu01.spn_PolyCount.value = The_SetArr[9]
+
+
+-- Fill SubD Switch 
+qs_SubDSwitch01.chk_FixedIter.triState 	= (fn_SetCheck The_SetArr[11])
+qs_SubDSwitch01.chk_MakeFixedFirs.triState	= (fn_SetCheck The_SetArr[10])
+qs_SubDSwitch01.spn_FixedItrsTS.value 	= The_SetArr[12][1]
+qs_SubDSwitch01.spn_FixedItrsMS.value 	= The_SetArr[12][2]
+qs_SubDSwitch01.spn_FixedItrsOS.value	= The_SetArr[12][3]
+qs_SubDSwitch01.chk_MSSkip.triState   	= (fn_SetCheck The_SetArr[13])
+
+--enable elements of SubD Switch roll
+qs_SubDSwitch01.chk_MakeFixedFirs.enabled	=
+qs_SubDSwitch01.spn_FixedItrsTS.enabled 	=
+qs_SubDSwitch01.spn_FixedItrsMS.enabled 	=
+qs_SubDSwitch01.spn_FixedItrsOS.enabled		= The_SetArr[11]	
+qs_SubMainMenu01.spn_RenderItrsCount.enabled = The_SetArr[2] --enable/disable rener iters spiner
+qs_SubMainMenu01.spn_PolyCount.enabled = The_SetArr[8] -- enable/disable skip by poly count	
+)
+--end func
+
+
+--Load Settings
 
 fn_LoadDDLItems()
 fn_ReadSettings()
--- end buttons position	
 
 --------------------------------------------------------------------------------------------------------------------------------------------
 --End Main UI
