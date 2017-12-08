@@ -58,7 +58,7 @@ rollout QSTogg_Intaller "Quick SubD Toggle v1.0.2" width:215 height:70
         filein (startupdir + "QSTAutoLoad.ms")
         sleep 1
 
-        if (queryBox "Instalation Compleate\n Go to Customize -> Customize User Interface, choose \"DmitryG Tools\" in the Category list and use it!\nOpen  Customize User Interface ?" title:"Quick SubD Toggle") do
+        if (queryBox "Instalation Compleate\n Go to Customize -> Customize User Interface, choose \"Quick SubD Toggle\" in the Category list and use it!\nOpen  Customize User Interface ?" title:"Quick SubD Toggle") do
         (
             actionMan.executeAction 0 "59226" 
         ) 

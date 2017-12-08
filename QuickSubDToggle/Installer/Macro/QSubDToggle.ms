@@ -1,6 +1,6 @@
 macroScript QSubDToggle
 buttonText: "ToggSubD"
-category:"DmitryG Tools"
+category:"Quick SubD Toggle"
 tooltip:"Toggle SubD"
 silentErrors: true 
 icon:#("QST_icons",1)

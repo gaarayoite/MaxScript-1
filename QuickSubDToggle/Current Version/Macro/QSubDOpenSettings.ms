@@ -1,6 +1,6 @@
 macroScript QSubDOpenSettings
-buttonText: "SubDSettings"
-category:"DmitryG Tools"
+buttonText: "QSubDSettings"
+category:"Quick SubD Toggle"
 tooltip:"QSubD Settings"
 icon:#("QST_icons",3)
 silentErrors: true
