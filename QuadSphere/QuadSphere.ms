@@ -111,6 +111,6 @@ rollout QSphereSettings "QSphere" width:120 height:126
 )
 --End UI
 
-CreateDialog QSphereSettings -- create dialog 
+CreateDialog QSphereSettings style:#(#style_toolwindow, #style_border, #style_sysmenu)-- create dialog 
 with undo on (fn_NewQSphere (QSphereSettings.spn_Dim.value) (QSphereSettings.spn_Seg.value)) -- create default sphere
 ) -- end script 
