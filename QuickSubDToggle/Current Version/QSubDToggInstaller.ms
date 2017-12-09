@@ -57,17 +57,16 @@ rollout QSTogg_Intaller "Quick SubD Toggle v1.0.2" width:215 height:70
         sleep 1
         filein (startupdir + "QSTAutoLoad.ms")
         sleep 1
-
-        if (queryBox "Instalation Compleate\n Go to Customize -> Customize User Interface, choose \"Quick SubD Toggle\" in the Category list and use it!\nOpen  Customize User Interface ?" title:"Quick SubD Toggle") do
-        (
-            actionMan.executeAction 0 "59226" 
-        ) 
     )
 
     on btn_inst pressed do 
     (
         fn_Install()
         colorman.reInitIcons()
+        if (queryBox "Instalation Compleate\n Go to Customize -> Customize User Interface, choose \"Quick SubD Toggle\" in the Category list and use it!\nOpen  Customize User Interface ?" title:"Quick SubD Toggle") do
+            (
+                actionMan.executeAction 0 "59226" 
+            ) 
     )
 
     on btn_uninst pressed do 
