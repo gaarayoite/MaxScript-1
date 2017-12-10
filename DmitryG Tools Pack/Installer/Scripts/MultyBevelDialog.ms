@@ -2,6 +2,7 @@ macroScript MultyBevelDialog
 buttonText: "MultyBevel"
 category:"DmitryG Tools"
 tooltip:"MultyBevel Dialog"
+icon:#("DmitryGTools_icons",7)
 silentErrors: true
 (
     if GetCommandPanelTaskMode() == #modify do 

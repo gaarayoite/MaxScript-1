@@ -2,6 +2,7 @@ macroScript TrackBarToggle
 buttonText:"TrackBar"
 category:"DmitryG Tools"
 tooltip:"TrackBar Toggle"
+icon:#("DmitryGTools_icons",4)
 silentErrors: true
 (
 if timeslider.isvisible()!=trackbar.visible then

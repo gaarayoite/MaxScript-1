@@ -2,6 +2,7 @@ macroScript MoveToOrigin
 buttonText:"Move To Origin"
 category:"DmitryG Tools"
 tooltip:"Move Selection To Origin"
+icon:#("DmitryGTools_icons",6)
 silentErrors: true
 (
  if selection.count > 0 then 

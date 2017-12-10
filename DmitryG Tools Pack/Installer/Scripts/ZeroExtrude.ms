@@ -2,6 +2,7 @@ macroScript ZeroExtrude
 buttonText: "ZeroExt"
 category:"DmitryG Tools"
 tooltip:"Zero Extrude"
+icon:#("DmitryGTools_icons",10)
 silentErrors: true
 (
     GWTextSettings = #((color 34  208  201),"0", [0,0,0],500) -- 1 - color, 2 face count, 3- text position, 4- time msec

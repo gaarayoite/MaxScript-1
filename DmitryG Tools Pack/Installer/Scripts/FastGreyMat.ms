@@ -2,6 +2,7 @@ macroScript FastGreyMat
 buttonText: "MAT Gray"
 category:"DmitryG Tools"
 tooltip:"Fast Grey Material"
+icon:#("DmitryGTools_icons",2)
 silentErrors: true
 (
 global theFastMat

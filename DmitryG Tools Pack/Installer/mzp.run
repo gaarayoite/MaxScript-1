@@ -1,0 +1,9 @@
+name "DmitryGToolsScriptPack"
+
+
+extract to $temp\DmitryGToolsTmp
+
+run  DGTinstaller.ms
+drop DGTinstaller.ms
+
+clear temp

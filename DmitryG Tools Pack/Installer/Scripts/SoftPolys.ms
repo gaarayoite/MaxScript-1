@@ -2,6 +2,7 @@ macroScript SoftPolys
 buttonText: "Soft Polys"
 category:"DmitryG Tools"
 tooltip:"Make Selected Polys Soft"
+icon:#("DmitryGTools_icons",9)
 silentErrors: true
 (
 currMod = modPanel.getCurrentObject()

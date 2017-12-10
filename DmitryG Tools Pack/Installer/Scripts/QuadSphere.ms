@@ -2,6 +2,7 @@ macroScript QuadSphere
 buttonText: "QuadSphere"
 category:"DmitryG Tools"
 tooltip:"QuadSphere"
+icon:#("DmitryGTools_icons",8)
 silentErrors: true
 (
 global QBox
