@@ -86,6 +86,7 @@ with undo off
 			(
 				SubDMod = TurboSmooth()
 				subDLevel = ModSettings[12][1]
+				TogsCount+=1
 			)
 			else (SubDMod = SubDModsArr[1])
 		SubDMod. smoothResult = true
@@ -98,6 +99,7 @@ with undo off
 					(
 						SubDMod = MeshSmooth()
 						subDLevel = ModSettings[12][2]
+						TogsCount+=1
 					)
 					else (SubDMod = SubDModsArr[2])
 				SubDMod. smoothResult = true
@@ -110,6 +112,7 @@ with undo off
 								(
 									SubDMod = OpenSubdiv()
 									subDLevel = ModSettings[12][3]
+									TogsCount+=1
 								)
 								else (SubDMod = SubDModsArr[3])
 							SubDMod. smoothtriangles = true
@@ -812,7 +815,7 @@ print (msg)
 public function fn_ToggSubD =
 (
 ---------Garbage Collector Force---------
-	if(TogsCount>512) do 
+	if(TogsCount>256) do 
 	(
 		TogsCount=0 
 		gc light:true delayed:false
