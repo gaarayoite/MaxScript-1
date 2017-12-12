@@ -4,7 +4,6 @@ category:"DmitryG Tools"
 tooltip:"Divide Edge. To open settings dialog\n use script as item of the quad menu"
 icon:#("DmitryGTools_icons",1)
 silentErrors: true
-silenterr
 (
 global VertCount = 1 -- target verts count
 global newVrxArr = #() -- new vereces array
