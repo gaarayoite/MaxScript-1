@@ -1,7 +1,7 @@
 macroScript EdgeDivide
 buttonText: "EdgeDivide"
 category:"DmitryG Tools"
-tooltip:"Divide Edge. To open settings dialog\n use script as item of the quad menu"
+tooltip:"Divide Edge. To open settings dialog use script as item of the quad menu"
 silentErrors: true
 (
 global VertCount = 1 -- target verts count

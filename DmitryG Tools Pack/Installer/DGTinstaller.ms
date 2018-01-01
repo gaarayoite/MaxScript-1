@@ -4,6 +4,7 @@ rollout DmitryGTools "DmitryG Tools v1.0" width:195 height:265
     local usermacros = (symbolicPaths.getPathValue "$userMacros")+"\\"
     local usericons = (symbolicPaths.getPathValue "$usericons")+"\\"
     local tmpdir = getFilenamePath (getSourceFileName())
+    local maxver = (maxversion())[1] 
     local ScriptArr = #(
         "EdgeDivide.ms",
         "FastGreyMat.ms",
@@ -35,7 +36,6 @@ rollout DmitryGTools "DmitryG Tools v1.0" width:195 height:265
 	
     on DmitryGTools open do 
     (
-    local maxver = (maxversion())[1] 
         if maxver<18000 do 
         (
             chb_ToggleHardEdgesDisplay.checked = false
