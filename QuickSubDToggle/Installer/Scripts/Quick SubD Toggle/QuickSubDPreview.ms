@@ -11,6 +11,7 @@ struct QuickSubDPreview
 	-------------Members-----------------
 private	SubDMod,-- Torbo Smooth modifier , OpenSubdivision, Mesh Smooth
 private	ModSettings = #(), -- subdivision settings
+private	TogsCount = 0 ,-- SubD toggs counter
 private	ModPos =0,  -- position of last selected modifier
 private GlobalModName = "Global_QSubD_Preview", -- global modifier name
 private FixedModName = "Fixed_QSubD_Preview", -- fixed modifier name
@@ -85,6 +86,7 @@ with undo off
 			(
 				SubDMod = TurboSmooth()
 				subDLevel = ModSettings[12][1]
+				TogsCount+=1
 				
 			)
 			else (SubDMod = SubDModsArr[1])
@@ -98,6 +100,7 @@ with undo off
 					(
 						SubDMod = MeshSmooth()
 						subDLevel = ModSettings[12][2]
+						TogsCount+=1
 						
 					)
 					else (SubDMod = SubDModsArr[2])
@@ -111,6 +114,7 @@ with undo off
 								(
 									SubDMod = OpenSubdiv()
 									subDLevel = ModSettings[12][3]
+									TogsCount+=1
 								
 								)
 								else (SubDMod = SubDModsArr[3])
@@ -814,6 +818,14 @@ print (msg)
 public function fn_ToggSubD =
 (
 
+---------Garbage Collector Force---------
+if(TogsCount>256) do 
+	(
+		TogsCount=0 
+		gc light:true delayed:false
+	)
+---------Garbage Collector Force---------
+
 --------SetUp QuickSubDModifier-------
 	if ($!=undefined)  then
 	(
@@ -835,8 +847,9 @@ with redraw off
 			else
 				(	
 					fn_PositionModInStack obj
-				)	
-				
+				)
+					
+				TogsCount+=1	
 		)
 		
 )--redraw off end
