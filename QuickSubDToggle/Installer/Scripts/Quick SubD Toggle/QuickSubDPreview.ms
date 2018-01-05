@@ -183,7 +183,7 @@ private function fn_PushMod obj the_pos=
 	)
 	else 
 		(
-			if obj.numFaces< (ModSettings[9] *1000) do 
+			if obj.mesh.numFaces< (ModSettings[9] *1000) do 
 			(
 				fn_AddMod obj the_pos
 			)
