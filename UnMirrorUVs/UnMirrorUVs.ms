@@ -7,7 +7,7 @@ silentErrors: true
 
 currmod = undefined
 itr = true
-StopTime = timeStamp() + 20000
+StopTime = timeStamp() + 1000
 
    function fn_checkMirror =
     (
