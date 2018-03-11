@@ -208,7 +208,7 @@ rollout qs_SubMainMenu01 "Main Settings"
 rollout qs_SubDSwitch01 "SubD Switch" 
 (
 	checkbox chk_FixedIter "Fixed Iterations" pos:[0,0] width:170 height:16 align:#left 					cheked:false
-	checkbox chk_MakeFixedFirs "Make Fixed Firs" pos:[0,21] width:170 height:16 align:#left cheked:false 	enabled:false
+	checkbox chk_MakeFixedFirs "Make Fixed First" pos:[0,21] width:170 height:16 align:#left cheked:false 	enabled:false
 	spinner spn_FixedItrsTS  "TS:" pos:[0,42] width:30 height:16 range:[0,8,3] type:#integer align:#left 	enabled:false
 	spinner spn_FixedItrsMS  "MS:" pos:[60,42] width:30 height:16 range:[0,8,3] type:#integer align:#left 	enabled:false
 	spinner spn_FixedItrsOS  "OS:" pos:[120,42] width:30 height:16 range:[0,8,4] type:#integer align:#left 	enabled:false
