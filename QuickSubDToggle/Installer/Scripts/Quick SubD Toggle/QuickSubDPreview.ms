@@ -1,5 +1,5 @@
 --By Dmitry Gubkin
---Module version - 1.0.3
+--Module version - 1.0.5
 --Main Script - Struct QuickSubDPreview
 --for 3ds 2016 and higher
 
@@ -9,18 +9,19 @@ global The_QSubDTogg -- var for struct instance
 struct QuickSubDPreview 
 (
 	-------------Members-----------------
-private	SubDMod,-- Torbo Smooth modifier , OpenSubdivision, Mesh Smooth
+private	SubDMod,-- Turbo Smooth modifier , OpenSubdivision, Mesh Smooth
 private	ModSettings = #(), -- subdivision settings
 private	TogsCount = 0 ,-- SubD toggs counter
-private	ModPos =0,  -- position of last selected modifier
+private	ModPos = 0,  -- position of last selected modifier
 private GlobalModName = "Global_QSubD_Preview", -- global modifier name
 private FixedModName = "Fixed_QSubD_Preview", -- fixed modifier name
 private IniName = "QuickSubDConfig.ini", --name of *.ini configuration file
 private ScriptPath = getFilenamePath (getSourceFileName()) + "\\", -- Default Script Directory
-private IniKeys = #("Iterations", "Enable Render Iterations","Render Iterations","Isolate Display","Stack Position","SubD Mod","Undo Off", "Skip By Poly Count","Poly Count","Make Fixet Firs","Enable Fixed Itr.","Fixed Itr.","Ignore MeshSmooth"), --keywords for *.ini "SubD Config"
+private IniKeys = #("Iterations", "Enable Render Iterations","Render Iterations","Isolate Display","Stack Position","SubD Mod","Undo Off", "Skip By Poly Count","Poly Count","Make Fixet First","Enable Fixed Itr.","Fixed Itr.","Ignore MeshSmooth","Back To Poly","Back To SubSel Level"), --keywords for *.ini "SubD Config"
 private SubDVars =#(#("Top Stack","After Selection","Before Selection"),#("Turbo Smooth","Mesh Smooth","OpenSubdiv"), #("Any","Global","Fixed"),#("Any","Turbo Smooth","Mesh Smooth","OpenSubdiv")), --SubD variants, 1- Mod StackPosition, 2 - SubD Mod
 private SubDModsArr = #(TurboSmooth(),Meshsmooth(),OpenSubdiv()), -- default modifier for with global control feature
 private GWSwitchTextSettings = #("SubDMod",2000,[0,0,0], (color 24 154 149)), -- settings for the text on global subD mod switching
+private ObjBuffer = #(undefined,undefined,0), -- last object, modifier and it sub - obj level(0 - none)
     -------------Members-----------------
 	
 -------------Funcs-----------------
@@ -43,7 +44,7 @@ with undo off
 		if superclassof currMod == modifier and currMod != SubDMod  do
 		(ModPos = modPanel.getModifierIndex  objs[1] currMod)		
 	
-		SetCommandPanelTaskMode #create
+		--SetCommandPanelTaskMode #create
 		)		
 	)
 )
@@ -54,7 +55,7 @@ with undo off
 --Default modifier paramiters 
 private function fn_SetDefaultSetting =
 (
-           with undo off ( ModSettings = #(2, false, 3, false, SubDVars[1][1], SubDVars[2][1], true, false,1000,true,true,#(2,2,3),true))
+           with undo off ( ModSettings = #(2, false, 3, false, SubDVars[1][1], SubDVars[2][1], true, false,1000,true,true,#(2,2,3),true,false,false))
 			--1 - iteration count; 
 			--2 - render iterations bool; 
 			--3 - render iterations count;			
@@ -68,6 +69,8 @@ private function fn_SetDefaultSetting =
 			--11 - Enable fixed iterations per subd mod
 			--12 - fixed iterations values
 			--13 - Ignore MeshSmooth switching
+			--14 - Back To Last Poly modifier
+			--15 - Activate Last SubObj Level
 ),
 -- end func
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -321,7 +324,7 @@ with redraw off
 (
 --Get last modifier position of Geometry objects
 	fn_GetModLastPos objs
-
+	SetCommandPanelTaskMode #create
 	
 	local currMod = SubDMod -- current global subDMod
 	local objMod = SubDMod -- SubDMod of current object
@@ -644,6 +647,8 @@ public function fn_SetSubDSettings arr =
 	ModSettings[11] = arr[11] as BooleanClass
 	ModSettings[12] = arr[12] as Array
 	ModSettings[13] = arr[13] as BooleanClass
+	ModSettings[14] = arr[14] as BooleanClass
+	ModSettings[15] = arr[15] as BooleanClass
 	fn_ApplySubDParams false
 ),
 --end func	
@@ -793,6 +798,18 @@ private function fn_ReadConfig =
 																if str =="true" or str =="false" then 
 																	( ModSettings[i] = str as BooleanClass) else (flag = true)
 															)
+
+															if i==14 do
+																(
+																	if str =="true" or str =="false" then 
+																		( ModSettings[i] = str as BooleanClass) else (flag = true)
+																)
+
+																if i==15 do
+																	(
+																		if str =="true" or str =="false" then 
+																			( ModSettings[i] = str as BooleanClass) else (flag = false)
+																	)
 									
         ) --end Loop
 
@@ -814,17 +831,185 @@ print (msg)
 --end func	
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
---Main working function
+--clean buffer
+private function fn_CleanBuff = 
+(
+	-- Clean Buffer				
+	ObjBuffer[1] = undefined
+	ObjBuffer[2] = undefined
+	ObjBuffer[3] = 0
+),
+--end func	
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+-- store or select last object 
+private function fn_LastObjBuffer obj store = 
+(
+--obj  - selection set
+-- store - bool var, true - store last obj, select last obj 	
+	if store == true then 
+	( 
+		with redraw off 
+		(
+			SetCommandPanelTaskMode #modify			
+			local currMod = modPanel.getCurrentObject()
+			
+			if ClassOf currMod == Editable_Poly or ClassOf currMod == Edit_Poly do 
+			(
+				ObjBuffer[1] = obj 
+				ObjBuffer[2] = currMod 
+				ObjBuffer[3] = subObjectLevel
+			)
+		)
+	) 
+		else 
+			(	
+				if isValidNode (ObjBuffer[1]) == true and  $ == (ObjBuffer[1])do 
+				(
+					local currMod = modPanel.getCurrentObject()
+					if currMod == ObjBuffer[2] then 
+					(
+						if ModSettings[15] == true do 
+						(subObjectLevel = ObjBuffer[3])
+						fn_CleanBuff()
+					)
+					else 
+						(
+							if ClassOf ObjBuffer[2] == Editable_Poly and ModSettings[14] == true  then 
+								(
+									with redraw  off 
+									(
+										with undo off 
+										(
+											SetCommandPanelTaskMode #modify
+											modPanel.setCurrentObject $.baseObject
+											if ModSettings[15] == true do 
+											(subObjectLevel = ObjBuffer[3])
+											fn_CleanBuff()
+										)
+									)
+								)
+									else 
+									(
+										if ClassOf ObjBuffer[2] == Edit_Poly and ModSettings[14] == true do 
+										(
+											with redraw off
+											(
+												with undo off
+												(
+													SetCommandPanelTaskMode #modify
+													try (modPanel.setCurrentObject (ObjBuffer[2])) catch ()
+													if ClassOf (modPanel.getCurrentObject()) == Edit_Poly and ModSettings[15] == true do 
+													(subObjectLevel = ObjBuffer[3])
+													fn_CleanBuff()
+												)
+											)
+										)
+									)			
+						)
+
+
+				
+				)
+				
+			)	
+),
+--end func	
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+--Autocheck Scene for global modifiers existing
+public function fn_CheckSceneGlobals = 
+(
+local objs = #()
+local GlobalKeys = #(false,false,false)
+local currMod = undefined
+with undo off 
+(
+with redraw off 
+(
+objs = for obj in $* where(superClassOf obj == GeometryClass) collect obj
+
+max modify mode
+
+	for obj in objs do 
+	(
+		if obj.modifiers[#Global_QSubD_Preview]!=undefined do 
+		(
+			currMod = obj.modifiers[#Global_QSubD_Preview]
+			if GlobalKeys[1] == false then
+			(
+				if ClassOf currMod == TurboSmooth do 
+				(
+					GlobalKeys[1] = true 
+					SubDModsArr[1] = currMod
+					print "=>#Global: TurboSmooth catched from the scene"
+
+				)
+			)
+			else 
+				(
+					if GlobalKeys[2] == false then
+					(
+						if ClassOf currMod == Meshsmooth do 
+							(
+								GlobalKeys[2] = true 
+								SubDModsArr[2] = currMod
+								print "=>#Global: MeshSmooth catched from the scene"
+							)
+					)
+					else
+						(
+							if GlobalKeys[3] == false do
+								(
+									if ClassOf currMod == OpenSubdiv do 
+										(
+											GlobalKeys[3] = true 
+											SubDModsArr[3] = currMod
+											print "=>#Global: OpenSubdiv catched from the scene"
+										)
+								)
+						)
+						
+				)
+		)
+
+	)
+
+	for obj in SubDModsArr do 
+	(
+		if ClassOf obj == ClassOf SubDMod do 
+			(
+				SubDMod = obj
+			)
+
+	)
+)
+)
+RedrawViews()
+),
+--end func	
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+-- Force GC
+
+private function fn_GCAutoForce =
+(
+	---------Garbage Collector Force---------
+	if(TogsCount>256) do 
+		(
+			TogsCount=0 
+			gc light:true delayed:false
+		)
+	---------Garbage Collector Force---------
+),
+--end func	
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+--Main working function, SubDivide Mesh (MODO Style)
 public function fn_ToggSubD =
 (
-
----------Garbage Collector Force---------
-if(TogsCount>256) do 
-	(
-		TogsCount=0 
-		gc light:true delayed:false
-	)
----------Garbage Collector Force---------
+	fn_GCAutoForce() -- GC Force
 
 --------SetUp QuickSubDModifier-------
 	if ($!=undefined)  then
@@ -836,21 +1021,39 @@ with redraw off
 (
 --Get last modifier position of Geometry objects
 	fn_GetModLastPos objs 
-		
-		for obj in objs do
-		(
-				
-			if obj.modifiers[#Global_QSubD_Preview]!=undefined or obj.modifiers[#Fixed_QSubD_Preview]!=undefined then 
+	
+	if objs.count == 1 then 
+	(
+		if objs[1].modifiers[#Global_QSubD_Preview]!=undefined or objs[1].modifiers[#Fixed_QSubD_Preview]!=undefined then 
 			(
-				fn_DeleteSubD obj
+				
+				fn_DeleteSubD objs[1]
+				fn_LastObjBuffer objs[1] false -- try activate last modifier and sub-obj level
+				
 			)
 			else
-				(	
-					fn_PositionModInStack obj
+				(
+					fn_LastObjBuffer objs[1] true -- -- try save last modifier and sub-obj level
+					fn_PositionModInStack objs[1]	
 				)
-					
 				TogsCount+=1	
-		)
+	)
+		else
+			(
+				for obj in objs do
+					(
+							
+						if obj.modifiers[#Global_QSubD_Preview]!=undefined or obj.modifiers[#Fixed_QSubD_Preview]!=undefined then 
+						(
+							fn_DeleteSubD obj	
+						)
+						else
+							(
+								fn_PositionModInStack obj	
+							)
+					) 	
+						TogsCount+=1	
+			)
 		
 )--redraw off end
 
@@ -858,6 +1061,103 @@ with redraw off
 		RedrawViews()
 	)
 	else (fn_SwitchSubD()) -- switch subD when selection is empty
+),
+--end func	
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+--SubDivide Mesh Maya Style
+public function fn_SubDMesh =
+(
+	fn_GCAutoForce() -- GC Force
+
+	--------SetUp QuickSubDModifier-------
+		if ($!=undefined)  then
+		(
+	--Collect GeometryClass objects
+	local objs = for obj in $ where(superClassOf obj == GeometryClass) collect obj
+	
+	with redraw off
+	(
+	--Get last modifier position of Geometry objects
+		fn_GetModLastPos objs 
+		if objs.count == 1 then 
+		(		
+			if objs[1].modifiers[#Global_QSubD_Preview]!=undefined do 
+			(
+				fn_LastObjBuffer objs[1] true -- -- try save last modifier and sub-obj level
+				fn_PositionModInStack objs[1]	
+			)	
+			TogsCount+=1		
+		)
+			else
+				(
+					for obj in objs do
+						(		
+							if obj.modifiers[#Global_QSubD_Preview]!=undefined do
+							(
+								fn_PositionModInStack obj	
+							)					
+							TogsCount+=1	
+						)
+				)
+		
+			
+	)--redraw off end
+	
+			SetCommandPanelTaskMode #modify
+			RedrawViews()
+		)
+		else (fn_SwitchSubD()) -- switch subD when selection is empty
+	
+),
+--end func	
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+--UnSubDivide Mesh Maya Style
+public function fn_UnSubDMesh =
+(
+	fn_GCAutoForce() -- GC Force
+
+	--------SetUp QuickSubDModifier-------
+		if ($!=undefined)  do
+		(
+	--Collect GeometryClass objects
+	local objs = for obj in $ where(superClassOf obj == GeometryClass) collect obj
+	
+	with redraw off
+	(
+	--Get last modifier position of Geometry objects
+		fn_GetModLastPos objs 
+
+		if objs.count == 1 then 
+		(
+			if objs[1].modifiers[#Global_QSubD_Preview]!=undefined or objs[1].modifiers[#Fixed_QSubD_Preview]!=undefined do
+
+			(
+				fn_DeleteSubD objs[1]
+				fn_LastObjBuffer objs[1] false -- try activate last modifier and sub-obj level
+			)	
+
+				TogsCount+=1
+		)
+		else 
+			(
+				for obj in objs do
+					(		
+						if obj.modifiers[#Global_QSubD_Preview]!=undefined or obj.modifiers[#Fixed_QSubD_Preview]!=undefined do
+						(
+							fn_DeleteSubD obj
+						)					
+						TogsCount+=1	
+					)
+			)
+
+	)--redraw off end
+	
+			SetCommandPanelTaskMode #modify
+			RedrawViews()
+		)	
 ),
 --end func	
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -881,6 +1181,11 @@ fn_ReadConfig()
 
 --Appling SubD Params
 fn_ApplySubDParams false
+
+--Scene Check CallBack Reg and UnReg
+callbacks.removeScripts id:#QSTSceneCheck
+callbacks.addScript #filePostOpen "The_QSubDTogg.fn_CheckSceneGlobals()" id:#QSTSceneCheck
+
 print("QuickSubDPreview is Ready!")
 )
 --end func	

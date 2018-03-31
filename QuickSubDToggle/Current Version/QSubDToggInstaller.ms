@@ -1,6 +1,6 @@
 try (DestroyDialog QSTogg_Intaller) catch()
 
-rollout QSTogg_Intaller "Quick SubD Toggle v1.0.2" width:215 height:70 
+rollout QSTogg_Intaller "Quick SubD Toggle v1.0.3" width:215 height:70 
 (
     local invalidver = (MaxVersion())[1]<18000 -- check 3ds max version
     local usermacros = (symbolicPaths.getPathValue "$userMacros")+"\\"

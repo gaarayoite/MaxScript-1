@@ -1,5 +1,5 @@
 
----QuckSubD Toggle global version v1.0.2---
+---QuckSubD Toggle global version v1.0.3---
 --  coded by Dmitry Gubkin 
 
 ---Destroying Dialog
@@ -49,9 +49,9 @@ function fn_SetConfig =
 --------------------------------------------------------------------------------------------------------------------------------------------
 ---Main UI 
 --------------------------------------------------------------------------------------------------------------------------------------------	
-rollout QuickSubDSettings "Quick SubD Toggle Settings v1.0.2" width:395 height:290
+rollout QuickSubDSettings "Quick SubD Toggle Settings v1.0.3" width:395 height:290
 (
-	subrollout qs_MainMenu    	width: 190 height:240 pos: [5,5] 		align:#left
+	subrollout qs_MainMenu    	width: 190 height:230 pos: [5,5] 		align:#left
 	subrollout qs_SubDSwitch    width: 190 height:110 pos: [200,5] 		align:#left
 	subrollout qs_Tools    		width: 190 height:153 pos: [200,115] 	align:#left
 	
@@ -127,9 +127,12 @@ rollout qs_SubMainMenu01 "Main Settings"
 	checkbox chk_SkipByPoly "Skip By Poly" pos:[0,160] width:90 height:16 align:#left cheked:false
 	spinner spn_PolyCount  pos:[100,160] width:60 height:16 range:[1,100000,1000] type:#integer align:#left enabled:false
 	label lb_PolyK "K." pos:[163,160] width:100 height:16 align:#left
-	
-	button      btn_Store 		"Store Config"  		pos: [0,190] 	width: 80  height: 20  align:#left
-	button      btn_Default 	"Reset Config"  		pos: [97,190] 	width: 80  height: 20  align:#left
+
+	checkbox chk_BackToPoly "Back To Poly" pos:[0,176] width:100 height:16 align:#left cheked:false
+	checkbox chk_PolySubLevel "Back To SubLevel" pos:[0,192] width:150 height:16 align:#left cheked:false 
+
+	button      btn_Store 		"Store Config"  		pos: [0,215] 	width: 80  height: 20  align:#left
+	button      btn_Default 	"Reset Config"  		pos: [97,215] 	width: 80  height: 20  align:#left
 
 --Events
 	on ddl_SubDType selected i do 
@@ -191,7 +194,8 @@ rollout qs_SubMainMenu01 "Main Settings"
 	(
 		fn_SetConfig()
 		The_QSubDTogg.fn_WriteConfig()
-		Print ("=>Config file has been successfully saved!")
+		Print ("=>Config file successfully saved!")
+		messageBox "Config file successfully saved!" title:"Quick SubD Toggle"
 	)
 -----------------------------------------
 	on btn_Default pressed do 
@@ -199,6 +203,26 @@ rollout qs_SubMainMenu01 "Main Settings"
 		The_QSubDTogg.fn_RestoreSettings()
 		fn_ReadSettings()
 		The_QSubDTogg.fn_RemoveConfig()
+	)
+-----------------------------------------
+	on chk_BackToPoly changed state do 
+	(
+		The_SetArr[14] = state
+		if state == true then 
+		(
+			chk_PolySubLevel.enabled = true 
+		)
+		else 
+			(
+				chk_PolySubLevel.enabled = false 
+				chk_PolySubLevel.triState = (fn_SetCheck The_SetArr[14])
+				The_SetArr[15] = The_SetArr[14]
+			)
+	)
+-----------------------------------------
+	on chk_PolySubLevel changed state do 
+	(
+		The_SetArr[15] = state
 	)
 -----------------------------------------
 --end Events			
@@ -394,6 +418,8 @@ qs_SubMainMenu01.chk_IsolateDisplay.triState  = (fn_SetCheck The_SetArr[4])
 qs_SubMainMenu01.chk_UndoOff.triState  = (fn_SetCheck The_SetArr[7])
 qs_SubMainMenu01.chk_SkipByPoly.triState = (fn_SetCheck The_SetArr[8])
 qs_SubMainMenu01.spn_PolyCount.value = The_SetArr[9]
+qs_SubMainMenu01.chk_BackToPoly.triState = (fn_SetCheck The_SetArr[14])
+qs_SubMainMenu01.chk_PolySubLevel.triState = (fn_SetCheck The_SetArr[15])
 
 
 -- Fill SubD Switch 
@@ -411,6 +437,7 @@ qs_SubDSwitch01.spn_FixedItrsMS.enabled 	=
 qs_SubDSwitch01.spn_FixedItrsOS.enabled		= The_SetArr[11]	
 qs_SubMainMenu01.spn_RenderItrsCount.enabled = The_SetArr[2] --enable/disable rener iters spiner
 qs_SubMainMenu01.spn_PolyCount.enabled = The_SetArr[8] -- enable/disable skip by poly count	
+qs_SubMainMenu01.chk_PolySubLevel.enabled = The_SetArr[14] -- enable/disable back to poly subLevel count
 )
 --end func
 
