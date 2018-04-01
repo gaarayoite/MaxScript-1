@@ -1,4 +1,5 @@
 try (DestroyDialog QSTogg_Intaller) catch()
+try DestroyDialog (QuickSubDSettings) catch()
 
 rollout QSTogg_Intaller "Quick SubD Toggle v1.0.3" width:215 height:70 
 (

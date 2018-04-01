@@ -383,7 +383,8 @@ with redraw off
 				
 			)
 --remove old modifier
-		fn_DeleteSubD obj
+		if upd != 2 do
+		(fn_DeleteSubD obj)
 
 --add new updated modifier
 			if upd == 1 or upd ==3 do 
@@ -401,7 +402,17 @@ with redraw off
 --add SubD modifier to object wich not used it before
 				if upd == 2 or upd == 3  do 
 				(
-					fn_PositionModInStack obj
+					if upd == 2 and obj.modifiers[#Global_QSubD_Preview] == undefined and obj.modifiers[#Fixed_QSubD_Preview] == undefined then 
+						(
+							fn_PositionModInStack obj
+						)
+						else 
+							(
+								if upd == 3 do 
+								(
+									fn_PositionModInStack obj
+								)
+							)
 				)
 			)
 	)
@@ -680,8 +691,8 @@ public function fn_WriteConfig =
 --end func	
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
---Loading ini file
-private function fn_ReadConfig =
+--Loading *ini with config file
+public function fn_ReadConfig =
 (
     local msg = "=>Config file: "--message base for user
     local IniPath = ScriptPath+ IniName
@@ -842,6 +853,17 @@ private function fn_CleanBuff =
 --end func	
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+-- Activate last *Poly SubLevel
+private function fn_SubLvActive = 
+(
+	if ModSettings[15] == true do 
+	(
+		subObjectLevel = ObjBuffer[3]
+	)
+),
+--end func	
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 -- store or select last object 
 private function fn_LastObjBuffer obj store = 
 (
@@ -869,8 +891,7 @@ private function fn_LastObjBuffer obj store =
 					local currMod = modPanel.getCurrentObject()
 					if currMod == ObjBuffer[2] then 
 					(
-						if ModSettings[15] == true do 
-						(subObjectLevel = ObjBuffer[3])
+						fn_SubLvActive()
 						fn_CleanBuff()
 					)
 					else 
@@ -883,8 +904,7 @@ private function fn_LastObjBuffer obj store =
 										(
 											SetCommandPanelTaskMode #modify
 											modPanel.setCurrentObject $.baseObject
-											if ModSettings[15] == true do 
-											(subObjectLevel = ObjBuffer[3])
+											fn_SubLvActive()
 											fn_CleanBuff()
 										)
 									)
@@ -898,9 +918,13 @@ private function fn_LastObjBuffer obj store =
 												with undo off
 												(
 													SetCommandPanelTaskMode #modify
-													try (modPanel.setCurrentObject (ObjBuffer[2])) catch ()
-													if ClassOf (modPanel.getCurrentObject()) == Edit_Poly and ModSettings[15] == true do 
-													(subObjectLevel = ObjBuffer[3])
+													try 
+													(
+														modPanel.setCurrentObject (ObjBuffer[2])
+														fn_SubLvActive()
+													) 
+													catch ()
+													
 													fn_CleanBuff()
 												)
 											)
@@ -1081,22 +1105,23 @@ public function fn_SubDMesh =
 	--Get last modifier position of Geometry objects
 		fn_GetModLastPos objs 
 		if objs.count == 1 then 
-		(		
-			if objs[1].modifiers[#Global_QSubD_Preview]!=undefined do 
+		(
+			if objs[1].modifiers[#Global_QSubD_Preview] == undefined and objs[1].modifiers[#Fixed_QSubD_Preview] == undefined do 
 			(
 				fn_LastObjBuffer objs[1] true -- -- try save last modifier and sub-obj level
 				fn_PositionModInStack objs[1]	
-			)	
+			) 
+
 			TogsCount+=1		
 		)
 			else
 				(
 					for obj in objs do
 						(		
-							if obj.modifiers[#Global_QSubD_Preview]!=undefined do
+							if obj.modifiers[#Global_QSubD_Preview] == undefined and obj.modifiers[#Fixed_QSubD_Preview] == undefined do 
 							(
 								fn_PositionModInStack obj	
-							)					
+							) 				
 							TogsCount+=1	
 						)
 				)

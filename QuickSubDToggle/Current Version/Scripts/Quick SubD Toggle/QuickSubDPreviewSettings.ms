@@ -131,8 +131,10 @@ rollout qs_SubMainMenu01 "Main Settings"
 	checkbox chk_BackToPoly "Back To Poly" pos:[0,176] width:100 height:16 align:#left cheked:false
 	checkbox chk_PolySubLevel "Back To SubLevel" pos:[0,192] width:150 height:16 align:#left cheked:false 
 
-	button      btn_Store 		"Store Config"  		pos: [0,215] 	width: 80  height: 20  align:#left
-	button      btn_Default 	"Reset Config"  		pos: [97,215] 	width: 80  height: 20  align:#left
+	button      btn_Store 		"Store Config"  pos: [2,215] 		width: 80  height: 20  align:#left
+	button      btn_Default 	"Default"  		pos: [93,215] 		width: 80  height: 20  align:#left
+	--button      btn_Reload 		"ReLoad"  		pos: [133,215] 	width: 45  height: 20  align:#left
+	
 
 --Events
 	on ddl_SubDType selected i do 
@@ -205,10 +207,16 @@ rollout qs_SubMainMenu01 "Main Settings"
 		The_QSubDTogg.fn_RemoveConfig()
 	)
 -----------------------------------------
+/* 	on btn_Reload pressed do 
+	(
+		The_QSubDTogg.fn_ReadConfig()()
+		fn_ReadSettings()
+	)
+----------------------------------------- */
 	on chk_BackToPoly changed state do 
 	(
 		The_SetArr[14] = state
-		if state == true then 
+	/* 	if state == true then 
 		(
 			chk_PolySubLevel.enabled = true 
 		)
@@ -217,7 +225,7 @@ rollout qs_SubMainMenu01 "Main Settings"
 				chk_PolySubLevel.enabled = false 
 				chk_PolySubLevel.triState = (fn_SetCheck The_SetArr[14])
 				The_SetArr[15] = The_SetArr[14]
-			)
+			) */
 	)
 -----------------------------------------
 	on chk_PolySubLevel changed state do 
@@ -437,7 +445,7 @@ qs_SubDSwitch01.spn_FixedItrsMS.enabled 	=
 qs_SubDSwitch01.spn_FixedItrsOS.enabled		= The_SetArr[11]	
 qs_SubMainMenu01.spn_RenderItrsCount.enabled = The_SetArr[2] --enable/disable rener iters spiner
 qs_SubMainMenu01.spn_PolyCount.enabled = The_SetArr[8] -- enable/disable skip by poly count	
-qs_SubMainMenu01.chk_PolySubLevel.enabled = The_SetArr[14] -- enable/disable back to poly subLevel count
+--qs_SubMainMenu01.chk_PolySubLevel.enabled = The_SetArr[14] -- enable/disable back to poly subLevel count
 )
 --end func
 
