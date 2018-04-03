@@ -1,7 +1,7 @@
 macroScript QSubDDivide
 buttonText: "SubDivide"
 category:"Quick SubD Toggle"
-tooltip:"SubDivide Mesh"
+tooltip:"SubDivide Mesh, Clear Selection to Switch #Global SubD Method"
 silentErrors: true 
 icon:#("QST_icons",4)
 (

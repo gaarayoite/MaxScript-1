@@ -1,7 +1,7 @@
 macroScript QSubDToggle
 buttonText: "ToggSubD"
 category:"Quick SubD Toggle"
-tooltip:"Toggle SubD"
+tooltip:"Toggle SubD, Clear Selection to Switch #Global SubD Method"
 silentErrors: true 
 icon:#("QST_icons",1)
 (

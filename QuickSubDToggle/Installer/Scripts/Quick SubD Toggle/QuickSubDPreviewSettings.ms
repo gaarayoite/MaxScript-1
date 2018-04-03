@@ -1,5 +1,5 @@
 
----QuckSubD Toggle global version v1.0.3---
+---QuckSubD Toggle global version v1.0.4---
 --  coded by Dmitry Gubkin 
 
 ---Destroying Dialog
@@ -55,15 +55,15 @@ rollout QuickSubDSettings "Quick SubD Toggle Settings v1.0.3" width:395 height:2
 	subrollout qs_SubDSwitch    width: 190 height:110 pos: [200,5] 		align:#left
 	subrollout qs_Tools    		width: 190 height:153 pos: [200,115] 	align:#left
 	
-	button      btn_Toggle 			"Toggle" width: 60  height: 20  align:#right
-	button      btn_Switch 			"Switch" width: 60  height: 20  align:#left
-	checkbutton btn_DisplaySubD 	"Show"   width: 60  height: 20  align:#right highlightColor:(color 79  170  176) cheked:false border:true
+	button      btn_Toggle 			"Toggle" width: 60  height: 20  align:#right tooltip: "Toggle SubD"
+	button      btn_Switch 			"Switch" width: 60  height: 20  align:#left tooltip: "Switch SubD"
+	checkbutton btn_DisplaySubD 	"Show"   width: 60  height: 20  align:#right highlightColor:(color 79  170  176) cheked:false border:true tooltip: "Display SubD information in viewport"
 	
-	button      btn_Cancel "Cancel"   	width: 60  height: 20  align:#right
-	button      btn_Apply "Apply"  		width: 60  height: 20  align:#left
-	button      btn_OK "OK"  		 	width: 60  height: 20  align:#right
+	button      btn_Cancel "Cancel"   	width: 60  height: 20  align:#right tooltip: "Close settings dialog"
+	button      btn_Apply "Apply"  		width: 60  height: 20  align:#left  tooltip: "Apply current settings"
+	button      btn_OK "OK"  		 	width: 60  height: 20  align:#right tooltip: "Apply current settings and close dialog"
 	
-	hyperlink   hl_WebSite ">By Dmitry Gubkin<"  pos:[245,270]  color:(color 79  180  176) hoverColor:(color 277 130 69)  visitedColor:(color 79  180  176)  address:"https://www.artstation.com/dmitry_g"
+	hyperlink   hl_WebSite ">By Dmitry Gubkin<"  pos:[245,270]  color:(color 79  180  176) hoverColor:(color 277 130 69)  visitedColor:(color 79  180  176)  address:"https://www.artstation.com/dmitry_g" 
 	
 
 	
@@ -116,23 +116,23 @@ rollout QuickSubDSettings "Quick SubD Toggle Settings v1.0.3" width:395 height:2
 --Sub UI Items
 rollout qs_SubMainMenu01 "Main Settings" 
 (
-	dropDownList ddl_SubDType "Subdivision Method:" pos:[0,0] width:180 height:40 align:#left 
+	dropDownList ddl_SubDType "Subdivision Method:" pos:[0,0] width:180 height:40 align:#left  
 	dropDownList ddl_PositionInStack "Position in Stack:" pos:[0,45] width:180 height:40 align:#left 
 	label lb_Itrs "Iterations:" pos:[0,90] width:100 height:16 align:#left
 	spinner spn_ItrsCount  pos:[126,90] width:50 height:16 range:[0,8,2] type:#integer align:#left
 	checkbox chk_RenderIters "Render Iterations" pos:[0,111] width:104 height:16 align:#left cheked:false
 	spinner spn_RenderItrsCount  pos:[126,111] width:50 height:16 range:[0,10,3] type:#integer align:#left  enabled:false
 	checkbox chk_IsolateDisplay "Isolate Display" pos:[0,127] width:104 height:16 align:#left cheked:false
-	checkbox chk_UndoOff "Undo Off" pos:[0,143] width:190 height:16 align:#left cheked:false
-	checkbox chk_SkipByPoly "Skip By Poly" pos:[0,160] width:90 height:16 align:#left cheked:false
-	spinner spn_PolyCount  pos:[100,160] width:60 height:16 range:[1,100000,1000] type:#integer align:#left enabled:false
+	checkbox chk_UndoOff "Undo Off" pos:[0,143] width:190 height:16 align:#left cheked:false tooltip: "Disable Undo\n Bbetter Performance for Fixed modifiers types"
+	checkbox chk_SkipByPoly "Skip By Poly" pos:[0,160] width:90 height:16 align:#left cheked:false tooltip: "Skip Mesh SubD if it tris count larger then defined value"
+	spinner spn_PolyCount  pos:[100,160] width:60 height:16 range:[1,100000,1000] type:#integer align:#left enabled:false cheked:false tooltip: "Tris Count limit (in thousands)"
 	label lb_PolyK "K." pos:[163,160] width:100 height:16 align:#left
 
-	checkbox chk_BackToPoly "Back To Poly" pos:[0,176] width:100 height:16 align:#left cheked:false
-	checkbox chk_PolySubLevel "Back To SubLevel" pos:[0,192] width:150 height:16 align:#left cheked:false 
+	checkbox chk_BackToPoly "Back To Poly" pos:[0,176] width:100 height:16 align:#left cheked:false tooltip: "Automatically activate last Edit/Editable poly modifier after UnSubD\nWorks only then ONE object selected\nLower performance"
+	checkbox chk_PolySubLevel "Back To SubLevel" pos:[0,192] width:150 height:16 align:#left cheked:false tooltip:"Automatically activate last subObject level of last selected Edit/Editable poly modifier after UnSubD\nWorks only then ONE object selected\nLower performance"
 
-	button      btn_Store 		"Store Config"  pos: [2,215] 		width: 80  height: 20  align:#left
-	button      btn_Default 	"Default"  		pos: [93,215] 		width: 80  height: 20  align:#left
+	button      btn_Store 		"Store Config"  pos: [2,215] 		width: 80  height: 20  align:#left tooltip:"Save User Config"
+	button      btn_Default 	"Default"  		pos: [93,215] 		width: 80  height: 20  align:#left tooltip: "Apply Default Config"
 	--button      btn_Reload 		"ReLoad"  		pos: [133,215] 	width: 45  height: 20  align:#left
 	
 
@@ -239,12 +239,12 @@ rollout qs_SubMainMenu01 "Main Settings"
 
 rollout qs_SubDSwitch01 "SubD Switch" 
 (
-	checkbox chk_FixedIter "Fixed Iterations" pos:[0,0] width:170 height:16 align:#left 					cheked:false
-	checkbox chk_MakeFixedFirs "Make Fixed First" pos:[0,21] width:170 height:16 align:#left cheked:false 	enabled:false
-	spinner spn_FixedItrsTS  "TS:" pos:[0,42] width:30 height:16 range:[0,8,3] type:#integer align:#left 	enabled:false
-	spinner spn_FixedItrsMS  "MS:" pos:[60,42] width:30 height:16 range:[0,8,3] type:#integer align:#left 	enabled:false
-	spinner spn_FixedItrsOS  "OS:" pos:[120,42] width:30 height:16 range:[0,8,4] type:#integer align:#left 	enabled:false
-	checkbox chk_MSSkip "Ignore Mesh Smooth Switching" pos:[0,63] width:170 height:16 align:#left 			cheked:false
+	checkbox chk_FixedIter "Fixed Iterations" pos:[0,0] width:170 height:16 align:#left 					cheked:false tooltip: "Use Fixed iterations\n Fixed - indepent settings per modifier\nIf disabled, Global settings will be used"
+	checkbox chk_MakeFixedFirs "Make Fixed First" pos:[0,21] width:170 height:16 align:#left cheked:false 	enabled:false tooltip: "Automatically Conver Current Global SubD Method in Fixed with the same SubD method\n For example: Global OpenSubDiv in Fixed OpensubDiv"
+	spinner spn_FixedItrsTS  "TS:" pos:[0,42] width:30 height:16 range:[0,8,3] type:#integer align:#left 	enabled:false tooltip: "Turbo Smooth predefined iterations count"
+	spinner spn_FixedItrsMS  "MS:" pos:[60,42] width:30 height:16 range:[0,8,3] type:#integer align:#left 	enabled:false tooltip: "Mesh Smooth predefined iterations count"
+	spinner spn_FixedItrsOS  "OS:" pos:[120,42] width:30 height:16 range:[0,8,4] type:#integer align:#left 	enabled:false tooltip:"OpenSubDiv predefined iterations count"
+	checkbox chk_MSSkip "Ignore Mesh Smooth Switching" pos:[0,63] width:170 height:16 align:#left 			cheked:false tooltip: "Disable Mesh Smooth SubD type from Global and Fixed switching cycle"
 	
 --Events	
 	on chk_FixedIter changed state do 
@@ -289,10 +289,10 @@ rollout qs_Tools01 "Exstra Tools"
 (
 	radiobuttons rb_seltype labels:#("All", "Selection") pos:[0,5] width:30 height:40 default:2 columns:1
 
-	button      btn_Remove 	"Remove"   				pos: [70,0] 	width: 52  height: 18  align:#left
-	button      btn_Update 	"Update"   				pos: [125,0] 	width: 52  height: 18  align:#left
-	button      btn_Add 	"Add"  						pos: [70,20] 	width: 30  height: 18  align:#left
-	button      btn_AddUpd 	"Add & Update"  		pos: [102,20] 	width: 75  height: 18  align:#left
+	button      btn_Remove 	"Remove"   				pos: [70,0] 	width: 52  height: 18  align:#left tooltip: "Remove SubD modifiers"
+	button      btn_Update 	"Update"   				pos: [125,0] 	width: 52  height: 18  align:#left tooltip: "Update SubD modifiers\nOriginal modifier position keeps"
+	button      btn_Add 	"Add"  						pos: [70,20] 	width: 30  height: 18  align:#left tooltip: "Add SubD modifiers"
+	button      btn_AddUpd 	"Add & Update"  		pos: [102,20] 	width: 75  height: 18  align:#left  tooltip: "Add & Update SubD modifiers\nOriginal modifier position keeps"
 	
 
 	
