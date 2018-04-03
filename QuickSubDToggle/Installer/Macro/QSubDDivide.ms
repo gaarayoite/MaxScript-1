@@ -3,7 +3,7 @@ buttonText: "SubDivide"
 category:"Quick SubD Toggle"
 tooltip:"SubDivide Mesh"
 silentErrors: true 
---icon:#("QST_icons",1)
+icon:#("QST_icons",4)
 (
  MsFolderPath = (symbolicPaths.getPathValue "$userScripts")+"\\Quick SubD Toggle\\" -- Default Script folder Path
  global The_QSubDTogg

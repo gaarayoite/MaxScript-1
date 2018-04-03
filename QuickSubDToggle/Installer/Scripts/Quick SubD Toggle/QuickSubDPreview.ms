@@ -55,7 +55,7 @@ with undo off
 --Default modifier paramiters 
 private function fn_SetDefaultSetting =
 (
-           with undo off ( ModSettings = #(2, false, 3, false, SubDVars[1][1], SubDVars[2][1], true, false,1000,true,true,#(2,2,3),true,false,false))
+           with undo off ( ModSettings = #(2, false, 3, false, SubDVars[1][1], SubDVars[2][1], false, false,1000,true,true,#(2,2,3),true,false,false))
 			--1 - iteration count; 
 			--2 - render iterations bool; 
 			--3 - render iterations count;			
