@@ -959,52 +959,62 @@ max modify mode
 	(
 		if obj.modifiers[#Global_QSubD_Preview]!=undefined do 
 		(
-			currMod = obj.modifiers[#Global_QSubD_Preview]
-			if GlobalKeys[1] == false then
+			if  GlobalKeys[1] == true and GlobalKeys[2] == true and GlobalKeys[3] == true then 
 			(
-				if ClassOf currMod == TurboSmooth do 
-				(
-					GlobalKeys[1] = true 
-					SubDModsArr[1] = currMod
-					print "=>#Global: TurboSmooth catched from the scene"
-
-				)
+				return (print "=> All #Global SubD Methods Catched From The Scene")
 			)
-			else 
+			 else 
 				(
-					if GlobalKeys[2] == false then
+					currMod = obj.modifiers[#Global_QSubD_Preview]
+					if GlobalKeys[1] == false do
+					(
+						if ClassOf currMod == TurboSmooth do 
+						(
+							GlobalKeys[1] = true 
+							SubDModsArr[1] = currMod
+							print "=>#Global: TurboSmooth catched from the scene"
+							
+							if ClassOf SubDMod == TurboSmooth do 
+							(
+								SubDMod = SubDModsArr[1]
+							)
+						)
+
+					)
+					
+					if GlobalKeys[2] == false do
 					(
 						if ClassOf currMod == Meshsmooth do 
 							(
 								GlobalKeys[2] = true 
 								SubDModsArr[2] = currMod
 								print "=>#Global: MeshSmooth catched from the scene"
+	
+								if ClassOf SubDMod == Meshsmooth do 
+								(
+									SubDMod = SubDModsArr[2]
+								)
 							)
 					)
-					else
+							
+					if GlobalKeys[3] == false do
 						(
-							if GlobalKeys[3] == false do
+							if ClassOf currMod == OpenSubdiv do 
 								(
-									if ClassOf currMod == OpenSubdiv do 
-										(
-											GlobalKeys[3] = true 
-											SubDModsArr[3] = currMod
-											print "=>#Global: OpenSubdiv catched from the scene"
-										)
+									GlobalKeys[3] = true 
+									SubDModsArr[3] = currMod
+									print "=>#Global: OpenSubdiv catched from the scene"
+
+									if ClassOf SubDMod == OpenSubdiv do 
+									(
+										SubDMod = SubDModsArr[3]
+									)
 								)
+	
 						)
-						
 				)
+										
 		)
-
-	)
-
-	for obj in SubDModsArr do 
-	(
-		if ClassOf obj == ClassOf SubDMod do 
-			(
-				SubDMod = obj
-			)
 
 	)
 )
