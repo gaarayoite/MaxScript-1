@@ -5,11 +5,11 @@ tooltip:"UnMirror UV Shells"
 silentErrors: true
 (
 
-currmod = undefined
-ResStore = #{}
-StoreFlag = true 
-itr = true
-StopTime = timeStamp() + 1000
+local currMod = undefined
+local ResStore = #{}
+local StoreFlag = true 
+local itr = true
+local StopTime = timeStamp() + 1000
 
    function fn_checkMirror =
     (
@@ -19,12 +19,12 @@ StopTime = timeStamp() + 1000
 			)
 			else 
 				(
-					currmod.selectInvertedFaces() 
-					facearr = currmod.getSelectedFaces()
+					currMod.selectInvertedFaces() 
+					facearr = currMod.getSelectedFaces()
 					
 					if StoreFlag == true do 
 					(
-						ResStore = currmod.getSelectedFaces()
+						ResStore = currMod.getSelectedFaces()
 						StoreFlag = false 
 					)
 					
@@ -54,11 +54,11 @@ StopTime = timeStamp() + 1000
 	
 if $ != undefined do 
     (
-     currmod= modPanel.getCurrentObject()
-        if ClassOf currmod ==  Unwrap_UVW then
+     currMod= modPanel.getCurrentObject()
+        if ClassOf currMod ==  Unwrap_UVW then
             (
 			   fn_checkMirror ()  
-			   currmod.unwrap6.selectFacesByNode ResStore $
+			   currMod.unwrap6.selectFacesByNode ResStore $
             )
             else (messagebox "Please use >Unwrap_UVW< modifier\n and open >UV Editor<\n before using this tool" title:"UnMirror UV Shells Tool")
     )
