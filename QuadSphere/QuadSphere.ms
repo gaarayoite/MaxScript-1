@@ -72,7 +72,7 @@ rollout QSphereSettings "QSphere" width:120 height:126
 
     on spn_Seg changed val do 
     (
-        if isValidNode QBox do 
+        if isValidNode QBox == true do 
         (
 			QBox. widthsegs = QBox. lengthsegs = QBox.heightsegs = val
 			QBox.Pivot = (QBox.center) as point3

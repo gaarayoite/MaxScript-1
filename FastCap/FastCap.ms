@@ -1,7 +1,7 @@
 macroScript FastCap
 buttonText: "FastCap"
 category:"DmitryG Tools"
-tooltip:"Cap hole by any sublevel selectin"
+tooltip:"Fast Cap"
 silentErrors: true
 (
     local currMod = modPanel.getCurrentObject()

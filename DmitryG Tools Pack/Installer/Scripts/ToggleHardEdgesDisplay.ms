@@ -5,13 +5,16 @@ tooltip:"Toggle Hard Edge Display"
 icon:#("DmitryGTools_icons",3)
 silentErrors: true
 (
-	if ClassOf $ == Editable_Poly do 
+	local currMod = modPanel.getCurrentObject()
+
+	if ClassOf currMod == Editable_Poly or ClassOf currMod == Edit_Poly then 
 	(
-		if $.hardedgedisplay == 1 then 
+		if currMod.hardedgedisplay == 1 then 
 		(
-			$.hardedgedisplay = 0
+			currMod.hardedgedisplay = 0
 		)
-		else ($.hardedgedisplay = 1)
+		
+		else (currMod.hardedgedisplay = 1)
 	)	
 )
 	

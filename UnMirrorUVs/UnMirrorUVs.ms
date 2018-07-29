@@ -45,7 +45,7 @@ local StopTime = timeStamp() + 1000
 								actionMan.executeAction 2077580866 "40032"  -- Unwrap UVW: Mirror Vertical
 								itr = true
 							)
-						print "UnMirror: Solving..."
+							
 						fn_checkMirror()
 					)
 				)
@@ -60,6 +60,6 @@ if $ != undefined do
 			   fn_checkMirror ()  
 			   currMod.unwrap6.selectFacesByNode ResStore $
             )
-            else (messagebox "Please use >Unwrap_UVW< modifier\n and open >UV Editor<\n before using this tool" title:"UnMirror UV Shells Tool")
+            else (messagebox "Please Add >Unwrap_UVW< modifier\n and open >UV Editor<\n before using this tool" title:"UnMirror UV Shells Tool")
     )
 )
