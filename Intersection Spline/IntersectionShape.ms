@@ -1,5 +1,5 @@
 macroScript IntersectionShape
-buttonText: "Inrs. Shape"
+buttonText: "Intrs. Shape"
 category:"DmitryG Tools"
 tooltip:"Create Intersection Shape"
 silentErrors: true
