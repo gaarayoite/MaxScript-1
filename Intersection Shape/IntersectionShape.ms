@@ -7,7 +7,7 @@ silentErrors: true
 	global objs = #() -- Array of Working objects (geometry)
 	global ShapeArr = #() -- Array of Shapes
 	global BoolMesh = undefined -- Boolean Object
-	global OptsArr = #(true, true) -- array of options, 1 - Merge Shapes, 2 - Keep Boolean Mesh
+	global OptsArr = #(true, false) -- array of options, 1 - Merge Shapes, 2 - Keep Boolean Mesh
 		
 --- Collect SubShapes
 	function fn_CollectShapes obj =   
@@ -36,16 +36,81 @@ silentErrors: true
 -- End Function 
 
 -- Reset XForm Shape 
-fn fn_ResetXFShape = 
-(
-	for obj in ShapeArr do 
-	(
-		addModifier obj (XForm())
-		convertToSplineShape obj
-		CenterPivot obj
+	fn fn_ResetXFShape Arr = 
+	(  setCommandPanelTaskMode #create
+		with undo off
+		(
+			with redraw off 
+			(
+				for obj in Arr do 
+				(
+					addModifier obj (XForm())
+					convertToSplineShape obj
+				)
+			)
+		)
 	)
-)
+
+-- Center Pivot 
+	fn fn_CPivot Arr = 
+	( setCommandPanelTaskMode #create 
+		with undo off 
+		(
+			with redraw off 
+			(
+				for obj in Arr do 
+				(
+					CenterPivot obj
+				)
+			)
+		)
+	)
 -- End Function 
+
+-- Enable in viewport togg  , Rend -- True - Render, False - Viewport
+	fn fn_VEnable Arr Rend =
+	(	
+		setCommandPanelTaskMode #create 
+		Arr = for obj in Arr where(superClassOf obj == Shape) collect obj
+		with undo off 
+		( 
+			with redraw off 
+			(
+				if keyboard.altPressed then 
+				(
+					for obj in Arr do 
+					(
+						if Rend == true then 
+						(
+							obj.render_renderable = false 
+						)
+						else 
+							(
+								obj.render_displayRenderMesh = false 
+							)
+					)
+					
+				)
+				else 
+					(
+						for obj in Arr do 
+							(
+								if Rend == true then 
+								(
+									obj.render_renderable = true 
+								)
+								else 
+									(
+										obj.render_displayRenderMesh = true 
+									)
+							)
+					)
+			)
+		)
+		
+		setCommandPanelTaskMode #modify
+	) 
+-- End Function
 
 -- Merge Shapes 
 	function fn_MergeShapes = 
@@ -97,13 +162,13 @@ fn fn_ResetXFShape =
 -- End Function 
 	
 -- Make Shape
-	function fn_MakeShape = 
+	function fn_CreateShape = 
 	(
 		setCommandPanelTaskMode #create 
 		
 		with undo off 
 		(
-			--disableSceneRedraw()
+			disableSceneRedraw()
 			objs = for obj in objs collect (copy obj )
 			
 			for obj in objs do
@@ -127,7 +192,8 @@ fn fn_ResetXFShape =
 			if ShapeArr.count != 0 do 
 			(
 				fn_MergeShapes()
-				fn_ResetXFShape()
+				fn_ResetXFShape ShapeArr
+				fn_CPivot ShapeArr
 			)
 			
 			enableSceneRedraw() 
@@ -158,9 +224,9 @@ fn fn_ResetXFShape =
 					if (queryBox  "Warning. Heavy Mesh Density.\nDo You Want Continue ?" title:"Intersection Spline ?") == false then 
 					(return false)
 					
-					else	(fn_MakeShape())
+					else	(fn_CreateShape())
 				)
-					else (fn_MakeShape())
+					else (fn_CreateShape())
 				
 			)
 		)
@@ -168,15 +234,20 @@ fn fn_ResetXFShape =
 -- End Function 
 try (destroyDialog ::IntersectionShapeDlg) catch() -- Destroy dialog
 --UI
-	rollout IntersectionShapeDlg "Intersection Shape" width:150 height:80 
+	rollout IntersectionShapeDlg "Intersection Shape" width:150 height:100 
 	(
-		checkbox cbx_Merge  "Merge Shapes" pos:[5, 5] width:140 height:16 checked:(OptsArr[1])
-		checkbox cbx_KeepBoolMesh  "Keep Bool Mesh (Hidden)" pos:[5, 26] width:140 height:16 checked:(OptsArr[2])
-		button btn_Make "Make" pos:[5, 50 ] width: 65  height: 25  align:#left
-		button btn_Delete "Delete Last" pos:[80,50 ] width: 65  height: 25  align:#left
+		checkbox cbx_Merge  "Merge Shapes" pos:[5, 5] width:140 height:16 checked:(OptsArr[1]) tooltip:"Merge Multy Intersections in One Shape"
+		checkbox cbx_KeepBoolMesh  "Keep Bool Mesh (Hidden)" pos:[5, 26] width:140 height:16 checked:(OptsArr[2]) tooltip:"Don't Delete Boolean Mesh(Hiden)\nLayer - Lyr_Boolean_Meshes"
+		button btn_Create "Create" pos:[5, 50 ] width: 65  height: 20  align:#left tooltip:"Create Intersaction Shape"
+		button btn_Delete "Delete Last" pos:[80,50 ] width: 65  height: 20  align:#left tooltip: "Delete Last Intersection Shape(s)\nand Boolean Mesh"
+		button btn_XForm "XF" pos:[5,75 ] width: 25  height: 20  align:#left tooltip: "Reset XForm(Shapes Only)"
+		button btn_CP "CP" pos:[34,76 ] width: 25  height: 20  align:#left tooltip: "Center Pivot"
+		button btn_ERender "R" pos:[62,75 ] width: 25  height: 20  align:#left tooltip: "Enable in Reder Selected Shape(s)\nALT - Disable"
+		button btn_EViewport "V" pos:[90,75 ] width: 25  height: 20  align:#left tooltip: "Enable in Viewport Selected Shape(s)\nALT - Disable"
+		button btn_MergeSel "M" pos:[118,75 ] width: 25  height: 20  align:#left  tooltip: "Merge Selection Shapes"
 		
 --Events 
-		on btn_Make pressed do
+		on btn_Create pressed do
 		(
 --Reset values
 			objs = #() 
@@ -213,6 +284,28 @@ try (destroyDialog ::IntersectionShapeDlg) catch() -- Destroy dialog
 				
 				
 			)
+		)
+
+		on btn_XForm pressed do
+		(
+			local Arr = for obj in selection where(superClassOf obj == Shape) collect obj
+			fn_ResetXFShape Arr
+			setCommandPanelTaskMode #modify 
+		)
+
+		on btn_CP pressed do
+		(
+			fn_CPivot selection
+		)
+
+		on btn_ERender pressed do
+		(
+			fn_VEnable selection true 
+		)
+
+		on btn_EViewport pressed do
+		(
+			fn_VEnable selection false 
 		)
 
 		on cbx_Merge changed state do 
